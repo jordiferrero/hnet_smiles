@@ -1,0 +1,28 @@
+# Core dependencies from hnet pyproject.toml
+torch>=2.5.1
+triton>=3.2.0
+einops
+optree
+regex
+omegaconf
+
+# Git dependencies (installed separately in setup script)
+# mamba_ssm @ git+https://github.com/state-spaces/mamba.git@a6a1dae6efbf804c9944a0c2282b437deb4886d8
+# flash_attn==2.8.0.post2  # May not work on Mac M-chip
+# causal_conv1d @ git+https://github.com/Dao-AILab/causal-conv1d.git@e940ead2fd962c56854455017541384909ca669f
+
+# Data processing
+pandas
+numpy
+
+# Visualization
+matplotlib
+imageio
+Pillow
+
+# Utilities
+tqdm
+
+# Optional: logging and experiment tracking
+# wandb
+
