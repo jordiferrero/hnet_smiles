@@ -37,7 +37,33 @@ LPPXB/
 
 ## Setup
 
-### 1. Create Virtual Environment
+### Option 1: Docker (Recommended for EC2/GPU)
+
+For running on EC2 instances with GPU, use Docker:
+
+```bash
+# Build the Docker image
+docker build -t hnet-smiles:latest .
+
+# Run with GPU support
+docker run --gpus all -it \
+  -v $(pwd)/datasets:/workspace/datasets:ro \
+  -v $(pwd)/checkpoints:/workspace/checkpoints \
+  -v $(pwd)/visualizations:/workspace/visualizations \
+  -v $(pwd)/configs:/workspace/configs:ro \
+  --name hnet-smiles \
+  hnet-smiles:latest
+
+# Or use docker-compose
+docker-compose up -d
+docker-compose exec hnet-smiles bash
+```
+
+See [DOCKER.md](DOCKER.md) for detailed Docker setup instructions.
+
+### Option 2: Local Setup
+
+#### 1. Create Virtual Environment
 
 ```bash
 cd setup
@@ -47,7 +73,7 @@ source ../venv/bin/activate
 
 The setup script automatically detects your platform (Mac M-chip, CUDA, or CPU) and installs the appropriate dependencies.
 
-### 2. Verify Installation
+#### 2. Verify Installation
 
 ```python
 python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'Device: {torch.cuda.is_available() or torch.backends.mps.is_available()}')"

@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  hnet-smiles:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hnet-smiles:latest
+    container_name: hnet-smiles-training
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+    volumes:
+      # Mount datasets for training
+      - ./datasets:/workspace/datasets:ro
+      # Mount checkpoints for saving/loading models
+      - ./checkpoints:/workspace/checkpoints
+      # Mount visualizations output
+      - ./visualizations:/workspace/visualizations
+      # Optional: mount configs if you want to modify them
+      - ./configs:/workspace/configs:ro
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    # Uncomment to run training automatically
+    # command: python3 train_smiles.py --config configs/hnet_smiles_small.json --phase small --max-samples 1000 --batch-size 8 --epochs 5 --output-dir checkpoints
+
