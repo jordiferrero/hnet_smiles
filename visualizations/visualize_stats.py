@@ -20,54 +20,138 @@ from hnet.models.config_hnet import AttnConfig, SSMConfig, HNetConfig
 from hnet.utils.tokenizers import ByteTokenizer
 
 
-def plot_training_curves(checkpoint_dir: Path, output_path: Path):
-    """Plot training curves from checkpoints."""
-    # Collect metrics from checkpoints
-    epochs = []
-    losses = []
-    ce_losses = []
-    lb_losses = []
+def format_bytes(bytes_val):
+    """Format bytes to human-readable format."""
+    if bytes_val >= 1_000_000_000:
+        return f"{bytes_val/1_000_000_000:.1f}B"
+    elif bytes_val >= 1_000_000:
+        return f"{bytes_val/1_000_000:.1f}M"
+    elif bytes_val >= 1_000:
+        return f"{bytes_val/1_000:.1f}K"
+    else:
+        return str(bytes_val)
+
+
+def plot_training_curves(checkpoint_dir: Path, output_path: Path, metadata_path: Path = None):
+    """Plot training curves from checkpoints, using training bytes as x-axis."""
+    # Try to load from metadata first (more reliable)
+    if metadata_path and metadata_path.exists():
+        with open(metadata_path, 'r') as f:
+            metadata = json.load(f)
+        
+        if 'training_history' in metadata and metadata['training_history']:
+            # Collect all checkpoints (both epoch and byte-based) sorted by training bytes
+            all_history = []
+            for h in metadata['training_history']:
+                cumulative_bytes = h.get('cumulative_training_bytes', 0)
+                if cumulative_bytes > 0:  # Only include entries with training bytes
+                    all_history.append({
+                        'cumulative_bytes': cumulative_bytes,
+                        'loss': h['metrics']['loss'],
+                        'ce_loss': h['metrics']['ce_loss'],
+                        'lb_loss': h['metrics']['lb_loss'],
+                        'checkpoint_type': h.get('checkpoint_type', 'epoch'),
+                    })
+            
+            # Sort by cumulative bytes
+            all_history.sort(key=lambda x: x['cumulative_bytes'])
+            
+            if all_history:
+                training_bytes = [h['cumulative_bytes'] for h in all_history]
+                losses = [h['loss'] for h in all_history]
+                ce_losses = [h['ce_loss'] for h in all_history]
+                lb_losses = [h['lb_loss'] for h in all_history]
+                
+                # Plot from metadata
+                fig, axes = plt.subplots(3, 1, figsize=(12, 10))
+                
+                axes[0].plot(training_bytes, losses, 'b-', marker='o', markersize=3, label='Total Loss')
+                axes[0].set_xlabel('Training Bytes')
+                axes[0].set_ylabel('Loss')
+                axes[0].set_title('Training Loss vs Training Bytes')
+                axes[0].legend()
+                axes[0].grid(True, alpha=0.3)
+                axes[0].xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: format_bytes(x)))
+                
+                axes[1].plot(training_bytes, ce_losses, 'r-', marker='o', markersize=3, label='Cross-Entropy Loss')
+                axes[1].set_xlabel('Training Bytes')
+                axes[1].set_ylabel('CE Loss')
+                axes[1].set_title('Cross-Entropy Loss vs Training Bytes')
+                axes[1].legend()
+                axes[1].grid(True, alpha=0.3)
+                axes[1].xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: format_bytes(x)))
+                
+                axes[2].plot(training_bytes, lb_losses, 'g-', marker='o', markersize=3, label='Load Balancing Loss')
+                axes[2].set_xlabel('Training Bytes')
+                axes[2].set_ylabel('LB Loss')
+                axes[2].set_title('Load Balancing Loss vs Training Bytes')
+                axes[2].legend()
+                axes[2].grid(True, alpha=0.3)
+                axes[2].xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: format_bytes(x)))
+                
+                plt.tight_layout()
+                plt.savefig(output_path, dpi=150)
+                print(f"Saved training curves to {output_path}")
+                return
+    
+    # Fallback: collect metrics from checkpoints
+    checkpoint_data = []
     
     for checkpoint_file in sorted(checkpoint_dir.glob("checkpoint_*.pt")):
         try:
             checkpoint = torch.load(checkpoint_file, map_location='cpu')
             if 'metrics' in checkpoint:
-                epochs.append(checkpoint['epoch'])
-                metrics = checkpoint['metrics']
-                losses.append(metrics.get('loss', 0))
-                ce_losses.append(metrics.get('ce_loss', 0))
-                lb_losses.append(metrics.get('lb_loss', 0))
+                cumulative_bytes = checkpoint.get('cumulative_training_bytes', 0)
+                if cumulative_bytes > 0:
+                    metrics = checkpoint['metrics']
+                    checkpoint_data.append({
+                        'cumulative_bytes': cumulative_bytes,
+                        'loss': metrics.get('loss', 0),
+                        'ce_loss': metrics.get('ce_loss', 0),
+                        'lb_loss': metrics.get('lb_loss', 0),
+                    })
         except Exception as e:
             print(f"Error loading {checkpoint_file}: {e}")
             continue
     
-    if not epochs:
+    if not checkpoint_data:
         print("No checkpoints found with metrics")
         return
     
-    # Plot
-    fig, axes = plt.subplots(3, 1, figsize=(10, 10))
+    # Sort by cumulative bytes
+    checkpoint_data.sort(key=lambda x: x['cumulative_bytes'])
     
-    axes[0].plot(epochs, losses, 'b-', label='Total Loss')
-    axes[0].set_xlabel('Epoch')
+    training_bytes = [d['cumulative_bytes'] for d in checkpoint_data]
+    losses = [d['loss'] for d in checkpoint_data]
+    ce_losses = [d['ce_loss'] for d in checkpoint_data]
+    lb_losses = [d['lb_loss'] for d in checkpoint_data]
+    
+    # Plot
+    fig, axes = plt.subplots(3, 1, figsize=(12, 10))
+    
+    axes[0].plot(training_bytes, losses, 'b-', marker='o', markersize=3, label='Total Loss')
+    axes[0].set_xlabel('Training Bytes')
     axes[0].set_ylabel('Loss')
-    axes[0].set_title('Training Loss')
+    axes[0].set_title('Training Loss vs Training Bytes')
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
+    axes[0].xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: format_bytes(x)))
     
-    axes[1].plot(epochs, ce_losses, 'r-', label='Cross-Entropy Loss')
-    axes[1].set_xlabel('Epoch')
+    axes[1].plot(training_bytes, ce_losses, 'r-', marker='o', markersize=3, label='Cross-Entropy Loss')
+    axes[1].set_xlabel('Training Bytes')
     axes[1].set_ylabel('CE Loss')
-    axes[1].set_title('Cross-Entropy Loss')
+    axes[1].set_title('Cross-Entropy Loss vs Training Bytes')
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
+    axes[1].xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: format_bytes(x)))
     
-    axes[2].plot(epochs, lb_losses, 'g-', label='Load Balancing Loss')
-    axes[2].set_xlabel('Epoch')
+    axes[2].plot(training_bytes, lb_losses, 'g-', marker='o', markersize=3, label='Load Balancing Loss')
+    axes[2].set_xlabel('Training Bytes')
     axes[2].set_ylabel('LB Loss')
-    axes[2].set_title('Load Balancing Loss')
+    axes[2].set_title('Load Balancing Loss vs Training Bytes')
     axes[2].legend()
     axes[2].grid(True, alpha=0.3)
+    axes[2].xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: format_bytes(x)))
     
     plt.tight_layout()
     plt.savefig(output_path, dpi=150)
@@ -98,7 +182,7 @@ def analyze_chunking_statistics(
             if bpred_outputs and len(bpred_outputs) > 0:
                 bpred = bpred_outputs[0]
                 boundary_mask = bpred.boundary_mask[0].cpu().numpy()
-                boundary_prob = bpred.boundary_prob[0, :, -1].cpu().numpy()  # Tokenized prob
+                boundary_prob = bpred.boundary_prob[0, :, -1].cpu().float().numpy()  # Tokenized prob, convert to float32
                 
                 # Compute chunk sizes
                 chunks = []
@@ -165,8 +249,14 @@ def main():
     parser.add_argument(
         '--checkpoint-dir',
         type=str,
-        default='checkpoints',
-        help='Directory with checkpoints (for training curves)'
+        default=None,
+        help='Directory with checkpoints (for training curves). If not provided, will use run-dir/checkpoints'
+    )
+    parser.add_argument(
+        '--run-dir',
+        type=str,
+        default=None,
+        help='Path to training run directory (contains checkpoints and metadata.json). Takes precedence over checkpoint-dir'
     )
     parser.add_argument(
         '--text-file',
@@ -186,12 +276,24 @@ def main():
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
+    # Determine checkpoint directory and metadata path
+    if args.run_dir:
+        run_dir = Path(args.run_dir)
+        checkpoint_dir = run_dir / "checkpoints"
+        metadata_path = run_dir / "metadata.json"
+    elif args.checkpoint_dir:
+        checkpoint_dir = Path(args.checkpoint_dir)
+        metadata_path = None
+    else:
+        checkpoint_dir = Path('checkpoints')
+        metadata_path = None
+    
     # Plot training curves if checkpoint directory exists
-    checkpoint_dir = Path(args.checkpoint_dir)
     if checkpoint_dir.exists():
         plot_training_curves(
             checkpoint_dir,
-            output_dir / 'training_curves.png'
+            output_dir / 'training_curves.png',
+            metadata_path=metadata_path
         )
     
     # Analyze chunking statistics if model is provided

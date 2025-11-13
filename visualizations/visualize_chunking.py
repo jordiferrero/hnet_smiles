@@ -13,6 +13,7 @@ import sys
 from tqdm import tqdm
 import imageio
 from PIL import Image
+import matplotlib.pyplot as plt
 
 # Add paths
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -44,6 +45,9 @@ def load_model(checkpoint_path: str, config_path: str, device: torch.device):
     # Load config
     with open(config_path, "r") as f:
         config_dict = json.load(f)
+    
+    # Remove training_config if present (not part of model config)
+    config_dict.pop("training_config", None)
     
     attn_cfg = AttnConfig(**config_dict.pop("attn_cfg"))
     ssm_cfg = SSMConfig(**config_dict.pop("ssm_cfg"))
@@ -91,7 +95,7 @@ def get_boundary_predictions(
         if bpred_outputs and len(bpred_outputs) > 0:
             bpred = bpred_outputs[0]  # First stage
             boundary_mask = bpred.boundary_mask[0].cpu().numpy()  # (L,)
-            boundary_prob = bpred.boundary_prob[0].cpu().numpy()  # (L, 2)
+            boundary_prob = bpred.boundary_prob[0].cpu().float().numpy()  # (L, 2) - convert to float32
         else:
             # Fallback: no boundaries detected
             boundary_mask = np.zeros(len(encoded['input_ids']), dtype=bool)
@@ -145,8 +149,9 @@ def visualize_progressive_chunking(
         
         # Convert to image
         fig.canvas.draw()
-        img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-        img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        # Use buffer_rgba() for newer matplotlib versions
+        buf = fig.canvas.buffer_rgba()
+        img = np.asarray(buf)
         frames.append(img)
         
         plt.close(fig)
@@ -169,7 +174,7 @@ def visualize_batch(
     output_dir: Path,
     prefix: str = "chunking",
 ):
-    """Visualize chunking for multiple texts."""
+    """Visualize chunking for multiple texts (creates individual GIFs)."""
     output_dir.mkdir(parents=True, exist_ok=True)
     
     for i, text in enumerate(tqdm(texts, desc="Visualizing")):

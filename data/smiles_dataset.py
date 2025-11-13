@@ -177,9 +177,9 @@ def collate_fn_padded(batch: List[Dict]) -> Dict[str, torch.Tensor]:
         input_ids.append(padded_ids)
         masks.append(mask)
     
-    # Convert to tensors
-    input_ids = torch.tensor(input_ids, dtype=torch.long)
-    masks = torch.tensor(masks, dtype=torch.bool)
+    # Convert to tensors (use numpy.array first for efficiency)
+    input_ids = torch.tensor(np.array(input_ids), dtype=torch.long)
+    masks = torch.tensor(np.array(masks), dtype=torch.bool)
     
     # Create labels (shifted by 1)
     labels = input_ids[:, 1:].clone()
