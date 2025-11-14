@@ -2,9 +2,17 @@
 
 Training pipeline for HNet (Hierarchical Network) on SMILES (Simplified Molecular Input Line Entry System) polymer and molecular data, with automatic visualization of dynamic chunking behavior during training.
 
-![Training Evolution](static/training_evolution.gif)
+## Training Evolution Visualizations
 
-*Dynamic chunking behavior evolution during HNet training on SMILES data*
+The following GIFs show how HNet learns to tokenize SMILES strings during training. Both models were trained under identical conditions (5 epochs, no concatenation) on different datasets:
+
+### Molecular Dataset (MOSES)
+![Molecular Training Evolution](static/training_evolution_molecular.gif)
+
+### Polymer Dataset (PI1M)
+![Polymer Training Evolution](static/training_evolution_polymer.gif)
+
+*Dynamic chunking behavior evolution during HNet training. The visualizations show boundary predictions at different training checkpoints, demonstrating how the model learns to segment SMILES strings into meaningful tokens.*
 
 ## Quick Start
 
@@ -82,8 +90,9 @@ hnet_smiles/
 │   ├── data/              # Analysis results and statistics
 │   ├── figures/           # Generated figures
 │   └── FINAL_REPORT.md    # Comprehensive analysis report
-├── static/                 # Static assets
-│   └── training_evolution.gif  # Example training visualization
+├── static/                 # Static assets for README
+│   ├── training_evolution_molecular.gif  # Molecular dataset training visualization
+│   └── training_evolution_polymer.gif    # Polymer dataset training visualization
 ├── train_smiles.py        # Main training script
 ├── generate_smiles.py     # SMILES generation script
 └── checkpoints/           # Training outputs (created automatically)
