@@ -1,6 +1,10 @@
 # HNet SMILES Training
 
-Training pipeline for HNet (Hierarchical Network) on SMILES (Simplified Molecular Input Line Entry System) polymer data, with automatic visualization of dynamic chunking behavior during training.
+Training pipeline for HNet (Hierarchical Network) on SMILES (Simplified Molecular Input Line Entry System) polymer and molecular data, with automatic visualization of dynamic chunking behavior during training.
+
+![Training Evolution](static/training_evolution.gif)
+
+*Dynamic chunking behavior evolution during HNet training on SMILES data*
 
 ## Quick Start
 
@@ -27,76 +31,75 @@ This project implements a complete training pipeline for HNet on SMILES data wit
 
 ## Installation
 
-### Option 1: Docker (Recommended for EC2/GPU)
+### On EC2 Instance (Pre-configured)
 
-For running on EC2 instances with GPU, use Docker:
-
-```bash
-# Build the Docker image
-docker build -t hnet-smiles:latest .
-
-# Run with GPU support
-docker run --gpus all -it \
-  -v $(pwd)/datasets:/workspace/datasets:ro \
-  -v $(pwd)/checkpoints:/workspace/checkpoints \
-  -v $(pwd)/visualizations:/workspace/visualizations \
-  -v $(pwd)/configs:/workspace/configs:ro \
-  --name hnet-smiles \
-  hnet-smiles:latest
-
-# Or use docker-compose
-docker-compose up -d
-docker-compose exec hnet-smiles bash
-```
-
-See [DOCKER.md](DOCKER.md) for detailed Docker setup instructions.
-
-### Option 2: Local Setup
-
-#### 1. Create Virtual Environment
+If you're working on the EC2 instance with pre-configured PyTorch environment:
 
 ```bash
-cd setup
-./setup_env.sh
-source ../venv/bin/activate
+source /opt/pytorch/bin/activate
+python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA: {torch.cuda.is_available()}')"
 ```
 
-The setup script automatically detects your platform (Mac M-chip, CUDA, or CPU) and installs the appropriate dependencies.
+### Local Setup (Mac/Linux)
 
-#### 2. Verify Installation
+For local installation from scratch:
 
-```python
-python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'Device: {torch.cuda.is_available() or torch.backends.mps.is_available()}')"
-```
+1. **Create Virtual Environment**:
+   ```bash
+   cd setup
+   ./setup_env.sh
+   source ../venv/bin/activate
+   ```
+
+2. **Verify Installation**:
+   ```bash
+   python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'Device: {torch.cuda.is_available() or torch.backends.mps.is_available()}')"
+   ```
+
+The setup script automatically detects your platform (Mac M-chip, CUDA, or CPU) and installs the appropriate dependencies. See `setup/README.md` for detailed instructions and troubleshooting.
 
 ## Project Structure
 
 ```
 hnet_smiles/
 ├── configs/                # Model configurations (edit these!)
-│   ├── hnet_smiles_small.json
-│   └── hnet_smiles_large.json
-├── data/                   # Data loading and analysis
-│   ├── analyze_smiles.py
-│   └── smiles_dataset.py
+│   ├── hnet_smiles_small.json  # Small config for testing
+│   └── hnet_smiles_large.json  # Large config for full training
+├── data/                   # Data loading modules
+│   ├── analyze_smiles.py   # SMILES data analysis utilities
+│   └── smiles_dataset.py   # PyTorch dataset implementation
+├── datasets/               # Actual data files
+│   ├── PI1M/
+│   │   └── PI1M_v2.csv     # Polymer SMILES dataset (~995K entries)
+│   └── moses/
+│       └── smiles-molecules-moses_all.csv  # Molecular SMILES dataset
 ├── visualizations/         # Visualization tools
 │   ├── visualize_training_evolution.py  # Training evolution GIFs
-│   ├── visualize_stats.py              # Training statistics
+│   ├── visualize_stats.py              # Training statistics plots
 │   └── utils.py                        # Visualization utilities
+├── analysis/               # Analysis notebooks and reports
+│   ├── notebooks/          # Jupyter notebooks for analysis
+│   ├── data/              # Analysis results and statistics
+│   ├── figures/           # Generated figures
+│   └── FINAL_REPORT.md    # Comprehensive analysis report
+├── static/                 # Static assets
+│   └── training_evolution.gif  # Example training visualization
 ├── train_smiles.py        # Main training script
-├── generate_smiles.py      # SMILES generation script
-├── datasets/
-│   └── PI1M/
-│       └── PI1M_v2.csv    # SMILES dataset (~995K entries)
+├── generate_smiles.py     # SMILES generation script
 └── checkpoints/           # Training outputs (created automatically)
     └── run_{phase}_{timestamp}/
         ├── checkpoints/   # Model checkpoints
+        │   ├── checkpoint_epoch_*.pt  # Epoch checkpoints
+        │   └── checkpoint_bytes_best.pt  # Best checkpoint
         ├── visualizations/
         │   ├── predictions/  # Compressed pickle files with boundary predictions
         │   │   └── predictions_bytes_*.pkl.gz
-        │   └── training_evolution.gif  # Generated GIF
-        ├── metadata.json  # Training metadata and history
-        └── test_smiles.txt  # Test SMILES used for visualization
+        │   ├── training_evolution_batch_1.gif  # Batch 1 visualization
+        │   ├── training_evolution_batch_2.gif  # Batch 2 visualization
+        │   └── ...                             # Additional batch visualizations
+        ├── metadata.json      # Training metadata and history
+        ├── test_smiles.txt    # Test SMILES used for visualization
+        └── run_purpose.txt    # Purpose/notes for this run
 ```
 
 ## Usage
@@ -249,11 +252,14 @@ All training parameters are in the `training_config` section:
     "data": "datasets/PI1M/PI1M_v2.csv",
     "phase": "large",
     "max_samples": null,
-    "batch_size": 64,
+    "batch_size": 16,
     "epochs": 5,
     "lr": 0.0001,
     "weight_decay": 0.1,
     "gradient_accumulation": 8,
+    "concatenate": true,
+    "num_concatenate": 10,
+    "concatenate_separator": " ",
     "checkpoint_bytes": 1000000,
     "num_test_samples": 50,
     "num_visualize": 15,
@@ -266,8 +272,8 @@ All training parameters are in the `training_config` section:
 
 ### Pre-configured Models
 
-- **`hnet_smiles_small.json`**: Minimal config for testing (512/768 dims, 1 epoch, 1000 samples)
-- **`hnet_smiles_large.json`**: Large-scale config (1024/1536 dims, 5 epochs, full dataset)
+- **`hnet_smiles_small.json`**: Small config for testing (512/768 dims, 2 epochs, 5000 samples)
+- **`hnet_smiles_large.json`**: Large-scale config (1024/1536 dims, configurable epochs, full dataset)
 
 ## Training Output
 
@@ -291,10 +297,12 @@ After training, you'll find in `checkpoints/run_{phase}_{timestamp}/`:
 
 ### Visualizations
 
-- **`visualizations/training_evolution.gif`**: Animated GIF showing chunking evolution
-  - Shows how boundary predictions evolve across training
+- **`visualizations/training_evolution_batch_N.gif`**: Animated GIFs showing chunking evolution
+  - Multiple GIFs generated, one per batch of test samples
+  - Shows how boundary predictions evolve across training checkpoints
   - Generated automatically at the end of training
   - Uses saved prediction files (no model reloading needed)
+  - Each GIF displays the tokenization behavior for a subset of test SMILES
 
 ### Metadata
 
@@ -306,6 +314,31 @@ After training, you'll find in `checkpoints/run_{phase}_{timestamp}/`:
   - Model info (parameters, device, dtype)
 
 - **`test_smiles.txt`**: Test SMILES used for visualization (one per line)
+- **`run_purpose.txt`**: Optional notes about the purpose of this training run
+
+## Analysis Framework
+
+The `analysis/` folder contains a comprehensive framework for analyzing HNet's tokenization behavior:
+
+### Analysis Components
+
+- **Jupyter Notebooks** (`notebooks/`):
+  - `01_data_generation.ipynb`: Generate tokenization data from trained models
+  - `02_dataset_nature_analysis.ipynb`: Compare PI1M (polymers) vs MOSES (molecules)
+  - `03_concatenation_effect.ipynb`: Analyze impact of concatenation strategy
+  - `04_training_amount_analysis.ipynb`: Study effect of training epochs
+  - `05_benchmark_comparison.ipynb`: Compare HNet with SmilesPE baseline
+
+- **Analysis Results** (`data/`):
+  - Tokenization statistics for all trained models
+  - Comparison summaries (CSV format)
+  - Token frequency distributions and statistics
+
+- **Reports**:
+  - `FINAL_REPORT.md`: Comprehensive analysis report with key findings
+  - Detailed comparison of HNet's learned tokenization vs. traditional methods
+
+This analysis framework enables deep investigation into how HNet learns to tokenize chemical SMILES strings dynamically.
 
 ## Key Features
 
@@ -375,8 +408,10 @@ If you want to regenerate visualizations from saved predictions:
 ```bash
 python visualizations/visualize_training_evolution.py \
     --run-dir checkpoints/run_large_20251110_164118 \
-    --output checkpoints/run_large_20251110_164118/visualizations/training_evolution.gif
+    --output checkpoints/run_large_20251110_164118/visualizations/
 ```
+
+This will generate multiple GIF files (`training_evolution_batch_1.gif`, `training_evolution_batch_2.gif`, etc.), one per batch of test samples.
 
 Plot training statistics:
 
@@ -399,21 +434,28 @@ python generate_smiles.py \
     --temperature 1.0
 ```
 
-## Dataset
+## Datasets
 
-The PI1M dataset contains ~995K SMILES strings representing polymers. Each entry is a SMILES string in the format:
+The project supports two SMILES datasets:
 
-```
-SMILES,SA Score
-*CCC[Fe]CCCC(=O)OCCCCOCCCNCC(*)=O,4.174851129781874
-...
-```
+### PI1M Dataset
+- **Path**: `datasets/PI1M/PI1M_v2.csv`
+- **Size**: ~995K SMILES strings representing polymers
+- **Format**: CSV with SMILES and SA Score columns
+- **Example**: `*CCC[Fe]CCCC(=O)OCCCCOCCCNCC(*)=O,4.174851129781874`
 
+### MOSES Dataset
+- **Path**: `datasets/moses/smiles-molecules-moses_all.csv`
+- **Size**: Molecular SMILES strings
+- **Format**: CSV with SMILES strings
+
+### Training Pipeline
 The training pipeline:
-- Extracts SMILES from the first column
-- Optionally concatenates multiple SMILES for longer sequences
-- Uses byte-level tokenization (ByteTokenizer) compatible with SMILES
-- Splits into train/test sets with a fixed random seed for reproducibility
+- Extracts SMILES from the first column (or the appropriate column)
+- Optionally concatenates multiple SMILES for longer sequences (10 by default)
+- Uses byte-level tokenization (ByteTokenizer) with 256 vocab size
+- Splits into train/test sets with a fixed random seed (42) for reproducibility
+- Supports both polymer (PI1M) and molecular (MOSES) SMILES
 
 ## Platform Support
 
@@ -478,6 +520,7 @@ python train_smiles.py --config configs/hnet_smiles_large.json
 
 ## References
 
-- Original HNet paper: [Dynamic Chunking for End-to-End Hierarchical Sequence Modeling](https://arxiv.org/abs/2507.07955)
-- Original HNet repository: https://github.com/goombalab/hnet
-- PI1M dataset: https://github.com/RUIMINMA1996/PI1M
+- **Original HNet paper**: [Dynamic Chunking for End-to-End Hierarchical Sequence Modeling](https://arxiv.org/abs/2507.07955)
+- **Original HNet repository**: https://github.com/goombalab/hnet
+- **PI1M dataset**: https://github.com/RUIMINMA1996/PI1M (Polymer SMILES)
+- **MOSES dataset**: https://github.com/molecularsets/moses (Molecular SMILES)
