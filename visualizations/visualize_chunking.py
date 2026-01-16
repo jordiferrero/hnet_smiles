@@ -25,6 +25,7 @@ from visualizations.utils import (
     bytes_to_hex,
     create_animation_frame,
     get_chunk_spans,
+    draw_multistage_chunking_visualization,
 )
 
 
@@ -77,9 +78,14 @@ def get_boundary_predictions(
 ) -> tuple:
     """
     Get boundary predictions for a text sequence.
+    Supports both 1-stage and 2-stage H-Net models.
     
     Returns:
-        (boundary_mask, boundary_prob, text)
+        (boundary_mask, boundary_prob, text, stages_data)
+        - boundary_mask: Stage 0 boundary mask (for backward compat)
+        - boundary_prob: Stage 0 boundary prob (for backward compat)
+        - text: Input text
+        - stages_data: List of dicts with 'boundary_mask' and 'boundary_prob' for each stage
     """
     # Tokenize
     encoded = tokenizer.encode([text], add_bos=True, add_eos=True)[0]
@@ -90,24 +96,44 @@ def get_boundary_predictions(
         mask = torch.ones(input_ids.shape, device=device, dtype=torch.bool)
         output = model.forward(input_ids, mask=mask)
         
-        # Extract boundary predictions from first stage
+        # Extract boundary predictions from ALL stages
         bpred_outputs = output.bpred_output
+        stages_data = []
+        
         if bpred_outputs and len(bpred_outputs) > 0:
-            bpred = bpred_outputs[0]  # First stage
-            boundary_mask = bpred.boundary_mask[0].cpu().numpy()  # (L,)
-            boundary_prob = bpred.boundary_prob[0].cpu().float().numpy()  # (L, 2) - convert to float32
-        else:
-            # Fallback: no boundaries detected
-            boundary_mask = np.zeros(len(encoded['input_ids']), dtype=bool)
-            boundary_mask[0] = True  # First token is always a boundary
-            boundary_prob = np.zeros((len(encoded['input_ids']), 2))
+            for stage_idx, bpred in enumerate(bpred_outputs):
+                if bpred is not None:
+                    stage_mask = bpred.boundary_mask[0].cpu().numpy()  # (L,)
+                    stage_prob = bpred.boundary_prob[0].cpu().float().numpy()  # (L, 2)
+                    
+                    # Only remove BOS/EOS tokens for Stage 0 (character level)
+                    # Stage 1+ operates on chunks, not characters - no BOS/EOS to remove
+                    if stage_idx == 0:
+                        stage_mask = stage_mask[1:-1]
+                        stage_prob = stage_prob[1:-1]
+                    
+                    stages_data.append({
+                        'stage': stage_idx,
+                        'boundary_mask': stage_mask,
+                        'boundary_prob': stage_prob,
+                    })
+        
+        # Fallback if no stages
+        if not stages_data:
+            fallback_mask = np.zeros(len(encoded['input_ids']) - 2, dtype=bool)
+            fallback_mask[0] = True
+            fallback_prob = np.zeros((len(encoded['input_ids']) - 2, 2))
+            stages_data.append({
+                'stage': 0,
+                'boundary_mask': fallback_mask,
+                'boundary_prob': fallback_prob,
+            })
     
-    # Remove BOS/EOS tokens for visualization
-    # BOS is at position 0, EOS is at the end
-    boundary_mask = boundary_mask[1:-1]  # Remove BOS and EOS
-    boundary_prob = boundary_prob[1:-1]
+    # Return stage 0 for backward compat, plus all stages
+    boundary_mask = stages_data[0]['boundary_mask']
+    boundary_prob = stages_data[0]['boundary_prob']
     
-    return boundary_mask, boundary_prob, text
+    return boundary_mask, boundary_prob, text, stages_data
 
 
 def visualize_progressive_chunking(
@@ -120,13 +146,17 @@ def visualize_progressive_chunking(
 ):
     """
     Create animated GIF showing progressive chunking as tokens are added.
+    Supports both 1-stage and 2-stage H-Net models.
     """
     print(f"Visualizing progressive chunking for: {text[:50]}...")
     
-    # Get full boundary predictions
-    boundary_mask, boundary_prob, _ = get_boundary_predictions(
+    # Get full boundary predictions (including all stages)
+    boundary_mask, boundary_prob, _, stages_data = get_boundary_predictions(
         model, tokenizer, text, device
     )
+    
+    num_stages = len(stages_data)
+    print(f"Model has {num_stages} chunking stage(s)")
     
     # Create frames for progressive visualization
     frames = []
@@ -134,17 +164,15 @@ def visualize_progressive_chunking(
     
     # Process incrementally
     for length in range(1, len(text) + 1, frame_step):
-        # Get boundary mask up to current length
-        current_mask = boundary_mask[:length]
-        
-        # Create frame
+        # Create frame with all stages
         fig = create_animation_frame(
             text=text,
             hex_encoding=hex_encoding,
-            boundary_mask=boundary_mask,  # Full mask for context
+            boundary_mask=boundary_mask,  # Stage 0 for backward compat
             boundary_prob=boundary_prob,
             current_length=length,
             frame_num=len(frames),
+            stages_data=stages_data if num_stages > 1 else None,  # Pass all stages if multi-stage
         )
         
         # Convert to image

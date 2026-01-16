@@ -359,6 +359,9 @@ def save_boundary_predictions(
     predictions = []
     
     # Save predictions for ALL test samples (not just num_visualize)
+    # Supports both 1-stage and 2-stage models
+    num_stages = 0  # Will be set based on first sample
+    
     with torch.no_grad():
         for text in test_smiles:
             # Tokenize
@@ -369,28 +372,51 @@ def save_boundary_predictions(
             mask = torch.ones(input_ids.shape, device=device, dtype=torch.bool)
             output = model.forward(input_ids, mask=mask)
             
-            # Extract boundary predictions from first stage
+            # Extract boundary predictions from ALL stages (supports 1-stage and 2-stage)
             bpred_outputs = output.bpred_output
+            stages_data = []  # List of dicts for each stage
+            
             if bpred_outputs and len(bpred_outputs) > 0:
-                bpred = bpred_outputs[0]  # First stage
-                boundary_mask = bpred.boundary_mask[0].cpu().numpy()  # (L,)
-                boundary_prob = bpred.boundary_prob[0].cpu().float().numpy()  # (L, 2)
-            else:
-                # Fallback: no boundaries detected
-                boundary_mask = np.zeros(len(encoded['input_ids']), dtype=bool)
-                boundary_mask[0] = True  # First token is always a boundary
-                boundary_prob = np.zeros((len(encoded['input_ids']), 2))
+                num_stages = len(bpred_outputs)
+                
+                for stage_idx, bpred in enumerate(bpred_outputs):
+                    if bpred is not None:
+                        stage_boundary_mask = bpred.boundary_mask[0].cpu().numpy()  # (L,)
+                        stage_boundary_prob = bpred.boundary_prob[0].cpu().float().numpy()  # (L, 2)
+                        
+                        # Only remove BOS/EOS tokens for Stage 0 (character level)
+                        # Stage 1+ operates on chunks, not characters - no BOS/EOS to remove
+                        if stage_idx == 0:
+                            stage_boundary_mask = stage_boundary_mask[1:-1]
+                            stage_boundary_prob = stage_boundary_prob[1:-1]
+                        
+                        stages_data.append({
+                            'stage': stage_idx,
+                            'boundary_mask': stage_boundary_mask,
+                            'boundary_prob': stage_boundary_prob,
+                        })
             
-            # Remove BOS/EOS tokens for visualization
-            boundary_mask = boundary_mask[1:-1]  # Remove BOS and EOS
-            boundary_prob = boundary_prob[1:-1]
+            # Fallback if no stages detected
+            if not stages_data:
+                fallback_mask = np.zeros(len(encoded['input_ids']) - 2, dtype=bool)  # -2 for BOS/EOS
+                fallback_mask[0] = True  # First token is always a boundary
+                fallback_prob = np.zeros((len(encoded['input_ids']) - 2, 2))
+                stages_data.append({
+                    'stage': 0,
+                    'boundary_mask': fallback_mask,
+                    'boundary_prob': fallback_prob,
+                })
             
-            # Store as numpy arrays (more efficient than lists)
-            predictions.append({
+            # Store prediction with all stages
+            # Backward compatibility: also store first stage as 'boundary_mask' and 'boundary_prob'
+            prediction_entry = {
                 'smiles': text,
-                'boundary_mask': boundary_mask,  # Keep as numpy array
-                'boundary_prob': boundary_prob,  # Keep as numpy array
-            })
+                'boundary_mask': stages_data[0]['boundary_mask'],  # Stage 0 for backward compat
+                'boundary_prob': stages_data[0]['boundary_prob'],  # Stage 0 for backward compat
+                'stages': stages_data,  # All stages for new visualization
+                'num_stages': len(stages_data),
+            }
+            predictions.append(prediction_entry)
     
     # Create structured data entry
     data_entry = {
@@ -399,6 +425,7 @@ def save_boundary_predictions(
         'bytes_threshold': bytes_threshold,
         'predictions': predictions,
         'test_smiles': test_smiles,  # Store test SMILES for reference
+        'num_stages': num_stages,  # Number of chunking stages (1 or 2)
     }
     
     # Save as compressed pickle file (one file per checkpoint)
