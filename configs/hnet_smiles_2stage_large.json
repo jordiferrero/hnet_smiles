@@ -1,0 +1,67 @@
+{
+    "arch_layout": [
+        "m4",
+        [
+            "T1m4",
+            [
+                "T22"
+            ],
+            "m4T1"
+        ],
+        "m4"
+    ],
+    "d_model": [
+        1024,
+        1024,
+        1536
+    ],
+    "d_intermediate": [
+        0,
+        2816,
+        4096
+    ],
+    "vocab_size": 256,
+    "ssm_cfg": {
+        "chunk_size": 256,
+        "d_conv": 4,
+        "d_state": 128,
+        "expand": 2
+    },
+    "attn_cfg": {
+        "num_heads": [
+            16,
+            16,
+            16
+        ],
+        "rotary_emb_dim": [
+            32,
+            32,
+            48
+        ],
+        "window_size": [
+            1023,
+            1023,
+            -1
+        ]
+    },
+    "tie_embeddings": false,
+    "training_config": {
+        "data": "datasets/moses/smiles-molecules-moses_all.csv",
+        "phase": "large",
+        "max_samples": null,
+        "batch_size": 16,
+        "epochs": 5,
+        "lr": 0.0001,
+        "weight_decay": 0.1,
+        "gradient_accumulation": 8,
+        "concatenate": true,
+        "num_concatenate": 10,
+        "concatenate_separator": " ",
+        "checkpoint_bytes": 1000000,
+        "num_test_samples": 5,
+        "num_visualize": 5,
+        "skip_visualization": false,
+        "output_dir": "checkpoints",
+        "no_amp": false
+    }
+}
