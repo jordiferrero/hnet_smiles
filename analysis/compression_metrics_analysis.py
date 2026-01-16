@@ -188,16 +188,16 @@ MODELS = {
         'epochs': 5,
         'architecture': '1-stage',
     },
-    # 2-Stage Architecture (TODO: Update paths when training completes)
+    # 2-Stage Architecture
     'PI1M_concat_5epoch_2stage': {
-        'path': checkpoints_dir / 'run_large_20260116_074355',  # Currently training
+        'path': checkpoints_dir / 'run_large_20260115_191350',
         'dataset': 'PI1M',
         'concatenate': True,
         'epochs': 5,
         'architecture': '2-stage',
     },
     'MOSES_concat_5epoch_2stage': {
-        'path': checkpoints_dir / 'run_large_2stage_MOSES',
+        'path': checkpoints_dir / 'run_large_20260116_074355',
         'dataset': 'MOSES',
         'concatenate': True,
         'epochs': 5,

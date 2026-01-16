@@ -63,6 +63,17 @@ models = [
         'path': project_root / 'checkpoints' / 'run_large_20251112_071557',
         'description': 'MOSES with 10-SMILES concatenation, 5 epoch (360M bytes)',
     },
+    # 2-Stage Architecture
+    {
+        'name': 'PI1M_concat_5epoch_2stage',
+        'path': project_root / 'checkpoints' / 'run_large_20260115_191350',
+        'description': 'PI1M 2-stage with 10-PSMILES concatenation, 5 epoch (240M bytes)',
+    },
+    {
+        'name': 'MOSES_concat_5epoch_2stage',
+        'path': project_root / 'checkpoints' / 'run_large_20260116_074355',
+        'description': 'MOSES 2-stage with 10-SMILES concatenation, 5 epoch (360M bytes)',
+    },
 ]
 
 print(f"\nTotal models to process: {len(models)}")
