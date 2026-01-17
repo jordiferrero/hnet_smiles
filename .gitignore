@@ -5,3 +5,7 @@
 /analysis/data
 *.log
 *.pkl
+
+# Large data files (exceed GitHub limits)
+datasets/moses/smiles-molecules-moses_all.csv
+property_prediction/data/polymer/PI1M_Tg_MAC.csv
