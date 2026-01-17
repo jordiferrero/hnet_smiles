@@ -1,0 +1,39 @@
+# Property Prediction Study - Dependencies
+# ==========================================
+# Install with: pip install -r requirements.txt
+
+# Core ML
+torch>=2.5.1
+numpy>=1.24
+pandas>=2.0
+scikit-learn>=1.3
+xgboost>=2.0
+
+# Chemistry
+rdkit>=2023.9
+
+# Visualization & Notebooks
+jupyter
+matplotlib>=3.7
+seaborn>=0.12
+
+# Utilities
+tqdm
+omegaconf
+
+# ==========================================
+# SOTA Model Dependencies (may require separate env)
+# ==========================================
+# Uncomment as needed:
+
+# For Lieconv-Tg (Tg prediction baseline)
+# tensorflow>=2.10
+# spektral
+# deepchem
+
+# For SMI-TED (molecule property prediction)
+# transformers>=4.30
+
+
+
+
