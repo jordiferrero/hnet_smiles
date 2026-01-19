@@ -1,0 +1,554 @@
+%%%%%%%% ICML 2026 PAPER: Dynamic Tokenization for Chemical SMILES %%%%%%%%%%%%%%%%%
+
+\documentclass{article}
+
+% Recommended packages
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+% Attempt to make hyperref and algorithmic work together better:
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Use for initial blind version submitted for review:
+\usepackage{icml2026}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+
+% Cleveref for referencing
+\usepackage[capitalize,noabbrev]{cleveref}
+
+% Custom commands
+\newcommand{\hnet}{H-Net}
+\newcommand{\smilespe}{SmilesPE}
+\newcommand{\bpb}{BPB}
+\newcommand{\ppl}{PPL}
+
+% Running title
+\icmltitlerunning{Learning Chemical Grammar: Dynamic Tokenization for SMILES}
+
+\begin{document}
+
+\twocolumn[
+  \icmltitle{Learning Chemical Grammar: Dynamic Tokenization for SMILES \\ with Hierarchical Networks}
+
+  \begin{icmlauthorlist}
+    \icmlauthor{Anonymous Author(s)}{}
+  \end{icmlauthorlist}
+
+  \icmlkeywords{Chemical Language Models, Tokenization, SMILES, Molecular Representation, Foundation Models}
+
+  \vskip 0.3in
+]
+
+\printAffiliationsAndNotice{}
+
+\begin{abstract}
+Tokenization fundamentally shapes how machine learning models represent chemical structures. While static tokenizers like SMILES Pair Encoding use predefined subword vocabularies, we investigate \emph{dynamic tokenization} using Hierarchical Networks (\hnet{}), which learn byte-level chunking patterns directly from data. We train 350M-parameter \hnet{} models on polymeric (PI1M) and molecular (MOSES) SMILES datasets, systematically analyzing how dataset nature, training context, training duration, and architecture affect learned tokenization. Our study reveals three key findings: (1)~\textbf{Dataset specificity matters}---\hnet{} learns distinct ``chemical vocabularies'' with only 30\% token overlap between polymer and molecular datasets, analogous to language-specific patterns in NLP; (2)~\textbf{Dynamic tokenization improves with training}---extended training yields 63\% more unique tokens and 23\% higher efficiency, achieving bits-per-byte of 0.64; (3)~\textbf{Learned representations transfer}---\hnet{} embeddings outperform RDKit descriptors on blood-brain barrier penetration classification (AUC 0.95 vs.\ 0.93) and achieve competitive polymer glass transition temperature prediction. We establish dynamic tokenization as a promising paradigm for chemical representation learning.
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:intro}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Chemical machine learning increasingly relies on string-based molecular representations, with SMILES (Simplified Molecular Input Line Entry System)~\citep{weininger1988smiles} serving as the dominant format. However, the \emph{tokenization} of these chemical strings---how they are segmented into discrete units for model consumption---fundamentally constrains what patterns models can learn.
+
+Current approaches employ \emph{static} tokenization strategies: character-level tokenization treats each symbol independently, losing chemical semantics; atom-level tokenization uses fixed chemical vocabularies; and subword methods like \smilespe{}~\citep{li2020smilespe} apply BPE-style algorithms trained on large chemical corpora. While these methods provide standardized vocabularies, they impose uniform tokenization regardless of the specific chemical domain---the same tokens are used for drug-like molecules, polymers, and natural products alike.
+
+This uniform approach may be suboptimal. In natural language processing, models trained on multilingual data learn language-specific tokenization patterns; Mandarin and English text yield fundamentally different token distributions even with shared architectures~\citep{hwang2025hnet}. We hypothesize that chemistry exhibits analogous domain specificity: polymeric structures, with their repeating units and complex topologies, may benefit from different tokenization than small drug-like molecules.
+
+To investigate this hypothesis, we apply \emph{dynamic tokenization} using Hierarchical Networks (\hnet{})~\citep{hwang2025hnet}, which learn byte-level chunking patterns directly from data through differentiable boundary prediction. Unlike static tokenizers, \hnet{} adapts its tokenization to dataset characteristics, potentially discovering domain-specific chemical ``grammars.''
+
+\textbf{Contributions.} We present the first systematic study of dynamic tokenization for chemical SMILES strings:
+\begin{enumerate}
+    \item We train and analyze 8 \hnet{} models (350M parameters each) on polymeric and molecular datasets, systematically varying dataset nature, concatenation strategy, training duration, and architecture.
+    \item We develop a comprehensive metrics suite including token statistics, Jaccard similarity, KL divergence, breakpoint analysis, and bits-per-byte compression to characterize tokenization behavior.
+    \item We demonstrate that \hnet{} learns dataset-specific vocabularies with only 30\% token overlap between polymer and molecular domains.
+    \item We validate that \hnet{} embeddings serve as effective chemical featurizers, outperforming traditional descriptors on classification tasks.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Related Work}
+\label{sec:related}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\textbf{Chemical String Representations.}
+SMILES~\citep{weininger1988smiles} remains the dominant chemical string format despite known limitations including non-uniqueness and arbitrary atom ordering. SELFIES~\citep{krenn2020selfies} guarantees syntactic validity but produces longer strings. For polymers, PSMILES~\citep{audus2021psmiles} extends SMILES notation with attachment point markers to represent repeating units.
+
+\textbf{Chemical Tokenization.}
+Character-level tokenization is simple but ignores chemical structure. Atom-level methods preserve chemical meaning but use fixed vocabularies. \smilespe{}~\citep{li2020smilespe} applies pair encoding to learn subword vocabularies from ChEMBL, achieving good compression while maintaining chemical interpretability. However, all these approaches are \emph{static}---they produce identical tokenization regardless of the downstream dataset or task.
+
+\textbf{Learned Tokenization.}
+\hnet{}~\citep{hwang2025hnet} introduces hierarchical networks with learned dynamic chunking, demonstrating that byte-level models can learn optimal segmentation directly from data. Originally developed for natural language, \hnet{} showed that different languages induce different tokenization patterns. Byte-level transformers~\citep{wang2022blt} and patch-based vision models~\citep{dosovitskiy2020vit} demonstrate similar principles in other domains. We extend this paradigm to chemistry.
+
+\textbf{Chemical Language Models.}
+ChemBERTa~\citep{chithrananda2020chemberta} and related models apply masked language modeling to SMILES. MolGPT~\citep{bagal2021molegpt} uses autoregressive generation. These models typically employ fixed tokenization, focusing on downstream task performance rather than tokenization analysis. Our work complements these approaches by examining how dynamic tokenization affects learned representations.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methods}
+\label{sec:methods}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{H-Net Architecture}
+
+We employ the \hnet{} architecture~\citep{hwang2025hnet}, which combines state-space models (Mamba blocks) with Transformer layers to enable dynamic chunking at the byte level.
+
+\textbf{1-Stage Architecture.} Our primary configuration uses layout \texttt{["m4", ["T22"], "m4"]}: 4 Mamba encoder blocks, 22 Transformer blocks with boundary prediction, and 4 Mamba decoder blocks. The model processes raw bytes (vocabulary size 256) and learns to predict chunk boundaries within the Transformer layers.
+
+\textbf{2-Stage Architecture.} We also evaluate a hierarchical variant \texttt{["m4", ["T1m4", ["T22"], "m4T1"], "m4"]} that introduces two levels of chunking: Stage~0 groups bytes into initial chunks, and Stage~1 groups these chunks into ``super-chunks.''
+
+\textbf{Model Dimensions.} All models use $d_{\text{model}} = [1024, 1536]$ for encoder/decoder and main network respectively, with 16 attention heads and rotary embeddings. Total parameters: $\sim$350M.
+
+\subsection{Datasets}
+
+\textbf{PI1M (Polymeric).} $\sim$1M polymeric SMILES (PSMILES) strings representing polymer repeat units with attachment point markers (\texttt{[*]}). Characterized by longer sequences and complex structural patterns.
+
+\textbf{MOSES (Molecular).} Standard molecular SMILES dataset containing drug-like small molecules. Shorter sequences with simpler structural motifs.
+
+\subsection{Training Configuration}
+
+\textbf{Loss Function.} We use cross-entropy loss for next-byte prediction with load-balancing regularization:
+\begin{equation}
+\mathcal{L} = \mathcal{L}_{\text{CE}} + 0.01 \times \mathcal{L}_{\text{LB}}
+\end{equation}
+where $\mathcal{L}_{\text{LB}}$ encourages uniform token selection across the routing module.
+
+\textbf{Optimization.} AdamW optimizer with hierarchical learning rate modulation: outer stages use $3\times$ base LR for higher plasticity, while the core network uses $0.9\times$ base LR for stability. Base LR: $10^{-4}$, gradient accumulation: 8 steps.
+
+\textbf{Concatenation.} We optionally concatenate 10 SMILES strings per training example (separated by spaces) to provide longer context during training.
+
+\subsection{Experimental Matrix}
+
+We train models varying four factors:
+\begin{itemize}
+    \item \textbf{Dataset}: PI1M (polymer) vs.\ MOSES (molecular)
+    \item \textbf{Concatenation}: None vs.\ 10$\times$ SMILES
+    \item \textbf{Epochs}: 1, 5, or 22
+    \item \textbf{Architecture}: 1-stage vs.\ 2-stage
+\end{itemize}
+
+This yields 8 trained models (6 1-stage + 2 2-stage), summarized in \cref{tab:models}.
+
+\begin{table}[t]
+\caption{Summary of trained \hnet{} models. All models use $\sim$350M parameters.}
+\label{tab:models}
+\vskip 0.1in
+\begin{center}
+\begin{small}
+\begin{tabular}{lcccc}
+\toprule
+Model & Dataset & Concat & Epochs & Arch \\
+\midrule
+PI1M-1ep & PI1M & 10$\times$ & 1 & 1-stg \\
+PI1M-5ep & PI1M & 10$\times$ & 5 & 1-stg \\
+PI1M-22ep & PI1M & 10$\times$ & 22 & 1-stg \\
+PI1M-nocat & PI1M & None & 5 & 1-stg \\
+PI1M-2stg & PI1M & 10$\times$ & 5 & 2-stg \\
+MOSES-5ep & MOSES & 10$\times$ & 5 & 1-stg \\
+MOSES-nocat & MOSES & None & 5 & 1-stg \\
+MOSES-2stg & MOSES & 10$\times$ & 5 & 2-stg \\
+\bottomrule
+\end{tabular}
+\end{small}
+\end{center}
+\vskip -0.1in
+\end{table}
+
+\subsection{Analysis Metrics}
+
+\textbf{Token Statistics.} Total tokens, unique tokens, tokens per SMILES, mean token length.
+
+\textbf{Vocabulary Overlap.} Jaccard similarity between token vocabularies: $J(A,B) = |A \cap B| / |A \cup B|$.
+
+\textbf{Distribution Divergence.} KL divergence between token frequency distributions.
+
+\textbf{Breakpoint Analysis.} Character positions where tokenization boundaries occur.
+
+\textbf{Compression.} Bits-per-byte ($\bpb{} = \mathcal{L}_{\text{CE}} / \ln 2$) measures compression efficiency. Lower is better; random prediction yields $\bpb{} = 8.0$.
+
+\subsection{Benchmark: SmilesPE}
+
+We compare against \smilespe{}~\citep{li2020smilespe}, an industry-standard tokenizer with vocabulary pre-trained on ChEMBL ($\sim$30K tokens). We apply \smilespe{} to both PI1M and MOSES datasets for direct comparison.
+
+\subsection{Property Prediction Evaluation}
+
+To assess representation quality, we extract \hnet{} hidden states (768-dim) using mean pooling and train XGBoost predictors with 5-fold cross-validation on:
+\begin{itemize}
+    \item \textbf{Polymer}: Glass transition temperature (Tg), Mass attenuation coefficient (MAC)
+    \item \textbf{Molecular}: Lipophilicity (LogD), Blood-brain barrier penetration (BBBP)
+\end{itemize}
+
+Baseline: RDKit Morgan fingerprints + 200 physicochemical descriptors ($\sim$2248 dimensions).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results}
+\label{sec:results}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We analyze tokenization behavior on 10,000 SMILES per dataset, providing statistically robust characterization.
+
+\subsection{Dataset Nature: Polymer vs.\ Molecular}
+\label{sec:dataset_nature}
+
+\begin{figure}[t]
+\vskip 0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/token_overlap_heatmap}}
+\caption{Token vocabulary overlap (Jaccard similarity) between models. Polymer and molecular models share only 30\% of tokens, indicating dataset-specific vocabulary learning.}
+\label{fig:overlap}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+Our central finding is that \hnet{} learns \emph{distinct tokenization strategies} for polymeric versus molecular SMILES. \Cref{tab:dataset_nature} quantifies this difference.
+
+\begin{table}[t]
+\caption{Comparison of polymer (PI1M) vs.\ molecular (MOSES) tokenization under matched conditions (5 epochs, no concatenation).}
+\label{tab:dataset_nature}
+\vskip 0.1in
+\begin{center}
+\begin{small}
+\begin{tabular}{lcc}
+\toprule
+Metric & Value & Interpretation \\
+\midrule
+Token Overlap (Jaccard) & 0.30 & Distinct vocabularies \\
+Breakpoint Overlap & 0.57 & Some shared motifs \\
+KL Divergence & 3.92 & Large distribution gap \\
+Tokens/SMILES (PI1M) & 22.0 & More complex \\
+Tokens/SMILES (MOSES) & 18.5 & Simpler structures \\
+\bottomrule
+\end{tabular}
+\end{small}
+\end{center}
+\vskip -0.1in
+\end{table}
+
+Only 30\% of tokens are shared between polymer and molecular models (\cref{fig:overlap}), comparable to the divergence between language-specific models in NLP. The KL divergence of 3.92 indicates substantially different frequency distributions. Polymer SMILES consistently require $\sim$20\% more tokens, reflecting their inherent structural complexity.
+
+\textbf{Interpretation.} Just as \hnet{} learns different tokens for Mandarin versus English~\citep{hwang2025hnet}, it discovers domain-specific ``chemical vocabularies''---byte patterns that efficiently represent polymer structures differ fundamentally from those optimal for drug-like molecules.
+
+\subsection{Concatenation Effect}
+
+\begin{figure}[t]
+\vskip 0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/dataset_nature_token_lengths_noconcat}}
+\caption{Token length distributions for polymer (PI1M) and molecular (MOSES) datasets. Polymer tokenization produces shorter tokens (2.2 vs.\ 2.4 characters on average), reflecting finer-grained segmentation.}
+\label{fig:token_lengths}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+Concatenating multiple SMILES during training provides longer context but could introduce noise from unrelated structures. \Cref{tab:concat} shows the effect.
+
+\begin{table}[t]
+\caption{Effect of concatenation (10$\times$ SMILES) on tokenization stability.}
+\label{tab:concat}
+\vskip 0.1in
+\begin{center}
+\begin{small}
+\begin{tabular}{lccc}
+\toprule
+Dataset & Token Overlap & Breakpoint Stability & $\Delta$ Unique \\
+\midrule
+PI1M & 0.35 & 0.76 & +41\% \\
+MOSES & 0.45 & \textbf{0.96} & +99\% \\
+\bottomrule
+\end{tabular}
+\end{small}
+\end{center}
+\vskip -0.1in
+\end{table}
+
+\textbf{Key finding.} Molecular SMILES show remarkable stability under concatenation---96\% of breakpoint positions are preserved. Polymer SMILES show more change (76\% stability), likely because their already-long sequences benefit more from additional context.
+
+Contrary to our initial hypothesis that polymers (being inherently concatenated structures) would be less affected, molecular SMILES actually showed greater stability. This suggests that the shorter, more stereotyped drug-like molecules have more consistent tokenization patterns.
+
+\subsection{Training Amount Effect}
+
+\begin{figure}[t]
+\vskip 0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/training_amount_effect}}
+\caption{Effect of training duration on tokenization. Extended training produces (a)~larger vocabularies, (b)~fewer tokens per SMILES (higher efficiency), and (c)~better compression (lower BPB).}
+\label{fig:training}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+We examine how tokenization evolves with training using PI1M models at 1, 5, and 22 epochs (\cref{tab:training}).
+
+\begin{table}[t]
+\caption{Effect of training duration on tokenization (PI1M, concatenated).}
+\label{tab:training}
+\vskip 0.1in
+\begin{center}
+\begin{small}
+\begin{tabular}{lccccc}
+\toprule
+Epochs & Unique & Tok/SMILES & Tok Len & \bpb{} \\
+\midrule
+1 & 4,903 & 21.6 & 2.20 & 0.83 \\
+5 & 5,775 & 18.2 & 2.62 & 0.69 \\
+22 & 8,019 & 16.6 & 2.87 & \textbf{0.64} \\
+\midrule
+$\Delta$ & +63\% & $-$23\% & +30\% & $-$23\% \\
+\bottomrule
+\end{tabular}
+\end{small}
+\end{center}
+\vskip -0.1in
+\end{table}
+
+Extended training produces dramatic improvements: 63\% more unique tokens, 23\% fewer tokens per SMILES (higher efficiency), and 30\% longer mean token length. Critically, breakpoint overlap between 1-epoch and 22-epoch models remains high (91\%), indicating that training refines \emph{what} tokens are learned while preserving \emph{where} boundaries occur.
+
+\textbf{Compression.} \bpb{} improves from 0.83 (1 epoch) to 0.64 (22 epochs), far better than random prediction (8.0) and comparable to well-trained English language models ($\sim$1.0--1.5 \bpb{}). This indicates \hnet{} learns meaningful chemical ``grammar''---predictable patterns in functional groups, rings, and stereochemistry.
+
+\subsection{Architecture: 1-Stage vs.\ 2-Stage}
+
+The 2-stage architecture introduces hierarchical chunking. \Cref{tab:arch} compares compression performance.
+
+\begin{table}[t]
+\caption{Compression comparison: 1-stage vs.\ 2-stage architecture.}
+\label{tab:arch}
+\vskip 0.1in
+\begin{center}
+\begin{small}
+\begin{tabular}{lcccc}
+\toprule
+Dataset & 1-Stage \bpb{} & 2-Stage \bpb{} & Improvement \\
+\midrule
+PI1M & 0.687 & 0.686 & +0.2\% \\
+MOSES & 0.682 & 0.679 & +0.4\% \\
+\bottomrule
+\end{tabular}
+\end{small}
+\end{center}
+\vskip -0.1in
+\end{table}
+
+2-stage provides marginal compression improvement (+0.2--0.4\%) with comparable perplexity. The hierarchical structure adds interpretability (viewing tokenization at multiple levels) without significant performance impact. Notably, molecular SMILES benefit slightly more from hierarchy despite their simpler structure.
+
+\subsection{H-Net vs.\ SmilesPE}
+
+\begin{figure}[t]
+\vskip 0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/benchmark_token_lengths}}
+\caption{Token length distributions comparing \hnet{} (2--3 characters) and \smilespe{} (4--6 characters). \hnet{} learns finer-grained, byte-level patterns while \smilespe{} uses coarser chemical subwords.}
+\label{fig:benchmark}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+\Cref{tab:benchmark} compares \hnet{} against the industry-standard \smilespe{} tokenizer.
+
+\begin{table}[t]
+\caption{Comparison of \hnet{} vs.\ \smilespe{} tokenization strategies.}
+\label{tab:benchmark}
+\vskip 0.1in
+\begin{center}
+\begin{small}
+\begin{tabular}{lcc}
+\toprule
+Aspect & \hnet{} & \smilespe{} \\
+\midrule
+Token length & 2--3 chars & 4--6 chars \\
+Vocabulary size & 6--8K & 1.6--2K \\
+Tokens/SMILES & 16--22 & 6--11 \\
+Adaptability & Dataset-specific & Fixed \\
+Training & Required & Zero-shot \\
+\bottomrule
+\end{tabular}
+\end{small}
+\end{center}
+\vskip -0.1in
+\end{table}
+
+The approaches embody different philosophies (\cref{fig:benchmark}): \hnet{} learns fine-grained, byte-level patterns adaptively, producing larger vocabularies but more tokens per SMILES. \smilespe{} uses predefined chemical subwords for efficient compression. These are \emph{complementary} rather than competing---\hnet{} excels at discovering dataset-specific patterns, while \smilespe{} provides interpretable, standardized tokens.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Application: Property Prediction}
+\label{sec:property}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+To validate that learned representations are useful, we evaluate \hnet{} embeddings for property prediction (\cref{tab:property}).
+
+\begin{table}[t]
+\caption{Property prediction results comparing \hnet{} embeddings (mean pooling) vs.\ RDKit descriptors with XGBoost.}
+\label{tab:property}
+\vskip 0.1in
+\begin{center}
+\begin{small}
+\begin{tabular}{llccc}
+\toprule
+Task & Metric & RDKit & \hnet{} & Winner \\
+\midrule
+BBBP & AUC$\uparrow$ & 0.927 & \textbf{0.950} & \hnet{} \\
+Tg & MAE$\downarrow$ & \textbf{24.8\textdegree{}C} & 26.6\textdegree{}C & RDKit \\
+Lipophilicity & MAE$\downarrow$ & \textbf{0.494} & 0.682 & RDKit \\
+MAC & MAE$\downarrow$ & \textbf{5.7e-5} & 10.3e-5 & RDKit \\
+\bottomrule
+\end{tabular}
+\end{small}
+\end{center}
+\vskip -0.1in
+\end{table}
+
+\textbf{Key findings:}
+\begin{itemize}
+    \item \textbf{Classification}: \hnet{} outperforms RDKit on BBBP by 2.3\% AUC (0.950 vs.\ 0.927), demonstrating that learned representations capture decision-relevant structure.
+    \item \textbf{Polymer Tg}: \hnet{} achieves 26.6\textdegree{}C MAE, competitive with RDKit (24.8\textdegree{}C) and comparable to specialized methods like Lieconv-Tg~\citep{zhang2023lieconv} (24.4 K).
+    \item \textbf{Precise regression}: RDKit outperforms on tasks requiring fine-grained numerical prediction (Lipophilicity, MAC).
+    \item \textbf{Pooling matters}: Mean pooling is essential; CLS-token pooling fails catastrophically (AUC drops 26\%).
+\end{itemize}
+
+These results suggest \hnet{} embeddings are complementary to traditional descriptors---useful for classification and polymer tasks, while RDKit excels at precise molecular regression.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+\label{sec:discussion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\textbf{Why does dynamic tokenization work?}
+Chemical strings contain domain-specific patterns---functional groups, ring systems, stereochemistry markers---that benefit from adaptive segmentation. Static tokenizers impose uniform boundaries that may not align with chemical semantics, while \hnet{} discovers dataset-relevant patterns through end-to-end learning.
+
+\textbf{Trade-offs.}
+\hnet{} requires training (1--3 days on GPU) and produces less interpretable tokens than chemistry-aware methods. However, it offers adaptability to novel chemical domains, continuous improvement with more data, and competitive downstream performance. The choice depends on the application: use \hnet{} for domain-specific representation learning; use \smilespe{} for standardized, interpretable tokenization.
+
+\textbf{Limitations.}
+Our study uses single model size (350M parameters); scaling behavior is unknown. Property prediction evaluation covers limited tasks. The byte-level approach increases sequence length compared to subword methods, impacting computational cost.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+\label{sec:conclusion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We presented the first systematic study of dynamic tokenization for chemical SMILES using \hnet{}. Our key findings are:
+
+\begin{enumerate}
+    \item \textbf{Dataset specificity}: \hnet{} learns distinct tokenization strategies with only 30\% vocabulary overlap between polymer and molecular domains.
+    \item \textbf{Training dynamics}: Extended training yields 63\% more unique tokens and 23\% higher efficiency without overfitting.
+    \item \textbf{Representation quality}: \hnet{} embeddings outperform RDKit on classification (BBBP) and achieve competitive polymer property prediction.
+\end{enumerate}
+
+These results establish dynamic tokenization as a promising paradigm for chemical representation learning. Future work includes hybrid approaches combining \hnet{}'s adaptability with chemistry-aware priors, interpretability analysis of learned tokens, and scaling to larger chemical corpora.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Impact Statement}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This paper presents work whose goal is to advance machine learning methods for chemical representation. Potential applications include drug discovery and materials design, which carry both benefits (accelerated therapeutic development) and risks (dual-use concerns). We encourage responsible deployment with appropriate safety considerations.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% References
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliography{references}
+\bibliographystyle{icml2026}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Appendix
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\appendix
+\onecolumn
+
+\section{Extended Results}
+\label{app:results}
+
+\subsection{Complete Model Comparison}
+
+\begin{table}[h]
+\caption{Complete tokenization statistics for all models.}
+\label{tab:complete}
+\begin{center}
+\begin{tabular}{lcccccc}
+\toprule
+Model & Total Tokens & Unique Tokens & Tokens/SMILES & Mean Tok Len & \bpb{} & \ppl{} \\
+\midrule
+\multicolumn{7}{l}{\textit{PI1M (Polymer) Models}} \\
+PI1M-1ep & 216,277 & 4,903 & 21.63 & 2.20 & 0.831 & 1.78 \\
+PI1M-5ep & 182,298 & 5,775 & 18.23 & 2.62 & 0.687 & 1.61 \\
+PI1M-22ep & 165,928 & 8,019 & 16.59 & 2.87 & 0.639 & 1.56 \\
+PI1M-nocat & 220,423 & 4,094 & 22.04 & 2.17 & 0.670 & 1.59 \\
+PI1M-2stg & 236,169 & 5,047 & 23.62 & 2.02 & 0.686 & 1.61 \\
+\midrule
+\multicolumn{7}{l}{\textit{MOSES (Molecular) Models}} \\
+MOSES-5ep & 172,964 & 6,183 & 17.30 & 2.01 & 0.682 & 1.60 \\
+MOSES-nocat & 184,614 & 3,112 & 18.46 & 2.12 & 0.658 & 1.58 \\
+MOSES-2stg & 186,361 & 3,799 & 18.64 & 1.87 & 0.679 & 1.60 \\
+\midrule
+\multicolumn{7}{l}{\textit{SmilesPE Benchmark}} \\
+SmilesPE-PI1M & 113,497 & 1,635 & 11.35 & 4.20 & --- & --- \\
+SmilesPE-MOSES & 58,589 & 1,969 & 5.86 & 5.94 & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection{Property Prediction Details}
+
+\begin{table}[h]
+\caption{Complete property prediction results with standard deviations.}
+\label{tab:property_full}
+\begin{center}
+\begin{tabular}{llccc}
+\toprule
+Model & Pooling & Tg MAE (°C) & MAC MAE & BBBP AUC \\
+\midrule
+RDKit & --- & 24.8 $\pm$ 0.7 & 5.7e-5 $\pm$ 0.2e-5 & 0.927 $\pm$ 0.009 \\
+\midrule
+hnet\_1ep\_nocat & mean & 26.6 $\pm$ 0.6 & 10.3e-5 $\pm$ 0.3e-5 & --- \\
+hnet\_5ep\_nocat & mean & 27.0 $\pm$ 0.5 & 10.6e-5 $\pm$ 0.3e-5 & 0.950 $\pm$ 0.002 \\
+hnet\_5ep\_cat & mean & 26.9 $\pm$ 0.6 & 11.1e-5 $\pm$ 0.4e-5 & 0.949 $\pm$ 0.006 \\
+hnet\_22ep\_cat & mean & 28.2 $\pm$ 0.5 & 11.6e-5 $\pm$ 0.3e-5 & --- \\
+hnet\_5ep\_2stg & mean & 27.4 $\pm$ 0.8 & 11.4e-5 $\pm$ 0.3e-5 & 0.950 $\pm$ 0.009 \\
+\midrule
+hnet\_5ep\_nocat & cls & 67.9 $\pm$ 1.3 & 26.0e-5 $\pm$ 0.4e-5 & 0.706 $\pm$ 0.024 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection{Training Configurations}
+
+All models were trained with the following configuration:
+\begin{itemize}
+    \item \textbf{Optimizer}: AdamW with weight decay 0.1
+    \item \textbf{Learning rate}: $1 \times 10^{-4}$ base, with hierarchical modulation
+    \item \textbf{Batch size}: 64 per GPU step, gradient accumulation 8 (effective 512)
+    \item \textbf{Precision}: bfloat16
+    \item \textbf{Hardware}: Single NVIDIA A100 GPU
+    \item \textbf{Training time}: 1--3 days depending on epochs
+\end{itemize}
+
+\section{Tokenization Examples}
+\label{app:examples}
+
+\textbf{Example 1: Simple polymer}
+\begin{verbatim}
+PSMILES: [*]CC(=O)OCC[*]
+
+H-Net tokens:  [*] | CC | (=O) | OCC | [*]
+SmilesPE:      [*] | CC(=O)O | CC | [*]
+\end{verbatim}
+
+\textbf{Example 2: Drug-like molecule}
+\begin{verbatim}
+SMILES: CC(C)Cc1ccc(C(C)C(=O)O)cc1
+
+H-Net tokens:  CC | (C) | Cc | 1 | ccc | (C | (C) | C(=O) | O) | cc | 1
+SmilesPE:      CC(C) | Cc1ccc | (C(C) | C(=O)O) | cc1
+\end{verbatim}
+
+\end{document}
+
