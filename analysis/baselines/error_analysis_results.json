@@ -1,0 +1,344 @@
+{
+  "PI1M_concat_22epoch": {
+    "model": "PI1M_concat_22epoch",
+    "token_length_anomalies": {
+      "short_tokens_count": 42,
+      "short_tokens_total_freq": 72957,
+      "long_tokens_count": 2266,
+      "long_tokens_total_freq": 4235,
+      "mean_length": 2.873722337399354,
+      "std_length": 2.786086329717649,
+      "max_length": 43,
+      "percentile_99": 14.0
+    },
+    "rare_tokens": {
+      "hapax_count": 5034,
+      "hapax_percentage": 62.8,
+      "rare_count": 1807,
+      "rare_percentage": 22.5,
+      "total_unique": 8019,
+      "example_hapax": [
+        "CCC[Fe]CCCC(=",
+        "NC2=",
+        "CCC*",
+        "*)C(=O)OCCCCCNC",
+        ")CCCCCCC",
+        "C)C(=O)N*",
+        "CCCNC(=O)NCCCC(=",
+        "C(=O)OCCCCCCC(=O)C(",
+        "C1=CC=C",
+        "NCCCCCCCCCCN1"
+      ]
+    },
+    "failure_modes": [
+      {
+        "type": "Atom Symbol Splitting",
+        "description": "Tokens that may split two-letter atom symbols (Cl, Br)",
+        "examples": [
+          [
+            "n",
+            247
+          ],
+          [
+            "s",
+            185
+          ],
+          [
+            "l",
+            49
+          ],
+          [
+            "r",
+            6
+          ]
+        ],
+        "severity": "Low",
+        "frequency": 487
+      },
+      {
+        "type": "Unbalanced Brackets",
+        "description": "Tokens with mismatched parentheses/brackets",
+        "examples": [
+          [
+            "3)cc",
+            691
+          ],
+          [
+            "2)cc",
+            533
+          ],
+          [
+            "*)=O)c",
+            374
+          ],
+          [
+            "=O)c",
+            315
+          ],
+          [
+            "*)C(=O)",
+            294
+          ]
+        ],
+        "severity": "Medium",
+        "frequency": 8353
+      },
+      {
+        "type": "Isolated Ring Numbers",
+        "description": "Ring closure numbers tokenized separately",
+        "examples": [
+          [
+            "1",
+            7350
+          ],
+          [
+            "2",
+            880
+          ],
+          [
+            "4",
+            180
+          ],
+          [
+            "3",
+            169
+          ],
+          [
+            "5",
+            68
+          ]
+        ],
+        "severity": "Low",
+        "frequency": 8792
+      }
+    ]
+  },
+  "PI1M_concat_5epoch": {
+    "model": "PI1M_concat_5epoch",
+    "token_length_anomalies": {
+      "short_tokens_count": 32,
+      "short_tokens_total_freq": 76291,
+      "long_tokens_count": 1368,
+      "long_tokens_total_freq": 2914,
+      "mean_length": 2.61566775280036,
+      "std_length": 2.3600797118720926,
+      "max_length": 71,
+      "percentile_99": 12.0
+    },
+    "rare_tokens": {
+      "hapax_count": 3330,
+      "hapax_percentage": 57.7,
+      "rare_count": 1395,
+      "rare_percentage": 24.2,
+      "total_unique": 5775,
+      "example_hapax": [
+        "]CCCC(=O",
+        "OCCCNCC(",
+        "1C=CNC",
+        "2=CC=C2C(",
+        "*C(=O)CNC(",
+        "OCCCCCNC",
+        "C)CCCCCCC(",
+        ")COCCCCC(",
+        "OCCCCCCC(=O)C(",
+        "CF)c"
+      ]
+    },
+    "failure_modes": [
+      {
+        "type": "Atom Symbol Splitting",
+        "description": "Tokens that may split two-letter atom symbols (Cl, Br)",
+        "examples": [
+          [
+            "l",
+            94
+          ],
+          [
+            "n",
+            68
+          ],
+          [
+            "s",
+            45
+          ],
+          [
+            "r",
+            1
+          ]
+        ],
+        "severity": "Low",
+        "frequency": 208
+      },
+      {
+        "type": "Unbalanced Brackets",
+        "description": "Tokens with mismatched parentheses/brackets",
+        "examples": [
+          [
+            "*CC(",
+            1737
+          ],
+          [
+            "=O)c",
+            1027
+          ],
+          [
+            "O*)c",
+            619
+          ],
+          [
+            "c4)c",
+            380
+          ],
+          [
+            ")F)c",
+            232
+          ]
+        ],
+        "severity": "Medium",
+        "frequency": 9317
+      },
+      {
+        "type": "Isolated Ring Numbers",
+        "description": "Ring closure numbers tokenized separately",
+        "examples": [
+          [
+            "1",
+            1538
+          ],
+          [
+            "2",
+            1172
+          ],
+          [
+            "3",
+            236
+          ],
+          [
+            "6",
+            174
+          ],
+          [
+            "4",
+            116
+          ]
+        ],
+        "severity": "Low",
+        "frequency": 3349
+      }
+    ]
+  },
+  "MOSES_concat_5epoch": {
+    "model": "MOSES_concat_5epoch",
+    "token_length_anomalies": {
+      "short_tokens_count": 24,
+      "short_tokens_total_freq": 98740,
+      "long_tokens_count": 619,
+      "long_tokens_total_freq": 822,
+      "mean_length": 2.011661386184408,
+      "std_length": 1.7313054081983879,
+      "max_length": 27,
+      "percentile_99": 9.0
+    },
+    "rare_tokens": {
+      "hapax_count": 3541,
+      "hapax_percentage": 57.3,
+      "rare_count": 1644,
+      "rare_percentage": 26.6,
+      "total_unique": 6183,
+      "example_hapax": [
+        "CC1C2CCC(C2)",
+        "C1CN(",
+        "2N(CC(O)",
+        "1cncn",
+        "C1CCCc",
+        "([n",
+        "CC1CC=CCC1",
+        "N=CC1CCC(O)N1C2=",
+        "2cnc",
+        "CC1CC("
+      ]
+    },
+    "failure_modes": [
+      {
+        "type": "Atom Symbol Splitting",
+        "description": "Tokens that may split two-letter atom symbols (Cl, Br)",
+        "examples": [
+          [
+            "n",
+            1595
+          ],
+          [
+            "l",
+            118
+          ],
+          [
+            "s",
+            93
+          ],
+          [
+            "r",
+            8
+          ]
+        ],
+        "severity": "Low",
+        "frequency": 1814
+      },
+      {
+        "type": "Unbalanced Brackets",
+        "description": "Tokens with mismatched parentheses/brackets",
+        "examples": [
+          [
+            "OC(=O",
+            623
+          ],
+          [
+            "C(=O",
+            600
+          ],
+          [
+            "CC(=",
+            566
+          ],
+          [
+            "(C(=",
+            401
+          ],
+          [
+            "NC(=O",
+            351
+          ]
+        ],
+        "severity": "Medium",
+        "frequency": 6509
+      },
+      {
+        "type": "Isolated Ring Numbers",
+        "description": "Ring closure numbers tokenized separately",
+        "examples": [
+          [
+            "1",
+            16060
+          ],
+          [
+            "2",
+            7322
+          ],
+          [
+            "3",
+            1797
+          ],
+          [
+            "12",
+            184
+          ],
+          [
+            "4",
+            66
+          ]
+        ],
+        "severity": "Low",
+        "frequency": 25449
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+functional_group,description,PI1M_concat_22epoch_occurrences,PI1M_concat_22epoch_single_token_pct,PI1M_concat_5epoch_occurrences,PI1M_concat_5epoch_single_token_pct,MOSES_concat_5epoch_occurrences,MOSES_concat_5epoch_single_token_pct,SmilesPE_PI1M_occurrences,SmilesPE_PI1M_single_token_pct,SmilesPE_MOSES_occurrences,SmilesPE_MOSES_single_token_pct
+carbonyl,C=O (carbonyl oxygen),1540,80.5,1540,78.8,1300,47.6,1540,99.9,1300,100.0
+hydroxyl,-OH (hydroxyl),3124,100.0,3124,100.0,2312,100.0,3124,100.0,2312,100.0
+carboxyl,-COOH (carboxylic acid),399,29.3,399,4.3,42,2.4,399,83.7,42,76.2
+ester,-COO- (ester),649,21.6,649,14.2,138,2.2,649,80.3,138,88.4
+ether,-C-O-C- (ether),836,44.3,836,79.5,398,54.8,836,60.4,398,90.2
+amine,-NH2/-NHR/-NR2 (amine),878,95.2,878,98.6,1206,98.6,878,99.4,1206,99.0
+amide,-CONH- (amide),484,24.8,484,12.0,513,1.0,484,94.8,513,96.9
+nitrile,-C≡N (nitrile),38,7.9,38,13.2,34,79.4,38,86.8,34,100.0
+thiol,-SH (thiol),273,98.5,273,100.0,273,100.0,273,100.0,273,100.0
+sulfone,-SO2- (sulfone),42,0.0,42,0.0,129,0.0,42,100.0,129,100.0
+benzene,Benzene ring,593,58.3,593,7.6,767,0.4,593,99.3,767,98.4
+phenyl,Aromatic carbons,2421,55.1,2421,25.0,2654,46.0,2421,99.1,2654,97.3
+fluorine,-F (fluorine),594,100.0,594,100.0,172,100.0,594,100.0,172,100.0
+chlorine,-Cl (chlorine),44,61.4,44,29.5,201,59.2,44,100.0,201,100.0
+trifluoromethyl,-CF3 (trifluoromethyl),72,2.8,72,0.0,22,0.0,72,93.1,22,100.0
+methyl,-CH3 (methyl),9747,100.0,9747,100.0,5184,100.0,9747,100.0,5184,100.0
+ethyl,-C2H5 (ethyl),3086,99.7,3086,100.0,1040,97.6,3086,99.8,1040,100.0
+propyl,-C3H7 (propyl),1441,99.4,1441,100.0,202,98.5,1441,82.1,202,97.5

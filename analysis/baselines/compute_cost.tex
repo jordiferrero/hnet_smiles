@@ -1,0 +1,23 @@
+
+\begin{table}[t]
+\caption{Computational cost comparison between \hnet{} and \smilespe{}.}
+\label{tab:compute_cost}
+\vskip 0.1in
+\begin{center}
+\begin{small}
+\begin{tabular}{lcc}
+\toprule
+Aspect & \hnet{} & \smilespe{} \\
+\midrule
+Training required & Yes & No (pre-trained) \\
+Training time & 18--72 hours & N/A \\
+Training hardware & 1$\times$ A10G GPU & N/A \\
+Inference speed & $\sim$1K SMILES/sec & $\sim$50K SMILES/sec \\
+Inference memory & 15--20 GB GPU & $<$1 GB CPU \\
+Adaptability & Per-dataset & Fixed vocabulary \\
+\bottomrule
+\end{tabular}
+\end{small}
+\end{center}
+\vskip -0.1in
+\end{table}

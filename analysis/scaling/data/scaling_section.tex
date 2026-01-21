@@ -1,0 +1,12 @@
+
+\subsection{Scaling Behavior}
+
+We analyze how tokenization quality scales with training compute (Figure~\ref{fig:scaling}). Using training configurations at 1, 5, and 22 epochs (corresponding to 48M, 238M, and 1048M training bytes), we observe:
+
+\textbf{Power-law compression improvement.} BPB improves from 0.83 to 0.62 as training compute increases 22$\times$, following an approximate power-law relationship: BPB $\propto$ FLOPs$^{-0.09}$ (R$^2$ = 0.97).
+
+\textbf{Vocabulary growth.} Unique tokens increase 64\% (4,903 $\rightarrow$ 8,019) with extended training, suggesting the model continues to discover specialized patterns rather than overfitting.
+
+\textbf{Efficiency saturation.} Tokens-per-SMILES improves 23\% (21.6 $\rightarrow$ 16.6) with diminishing returns: most improvement occurs in early training.
+
+While we focus on a single model size (350M parameters), these scaling trends suggest that both larger models and longer training could further improve tokenization quality, consistent with scaling laws observed in natural language~\citep{kaplan2020scaling}.

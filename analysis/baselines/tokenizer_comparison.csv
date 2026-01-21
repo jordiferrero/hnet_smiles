@@ -1,0 +1,5 @@
+Tokenizer,Token Length,Vocab Size,Tokens/SMILES (PI1M),Tokens/SMILES (MOSES),Adaptability,Training
+Character,1.0,50-70,47.7,34.8,None,None
+BPE,3-4 chars,~8K,~14,~10,Trained,Required
+SmilesPE,4-6 chars,1.6-2K,11.3,5.9,Fixed,Zero-shot
+H-Net,2-3 chars,6-8K,16.6,17.3,Adaptive,Required

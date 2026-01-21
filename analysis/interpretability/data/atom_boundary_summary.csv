@@ -1,0 +1,5 @@
+model,samples,total_tokens,tokens_per_smiles,atoms_per_smiles,respects_start_pct,respects_end_pct,fully_respects_pct,splits_atom_pct,atoms_per_token
+PI1M_concat_22epoch,1000,13730,13.73,22.7,85.6,79.7,69.8,4.1,1.79
+PI1M_concat_5epoch,1000,14780,14.78,22.7,83.1,76.8,66.2,2.2,1.74
+MOSES_concat_5epoch,1000,16834,16.83,20.35,94.3,89.5,84.4,1.4,1.27
+PI1M_concat_5epoch_2stage,1000,19636,19.64,22.7,86.3,81.3,71.2,2.7,1.32

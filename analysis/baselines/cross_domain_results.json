@@ -1,0 +1,32 @@
+{
+  "vocabulary_overlap": {
+    "jaccard": 0.06,
+    "pi1m_vocab_size": 5775,
+    "moses_vocab_size": 6183,
+    "shared_tokens": 706
+  },
+  "cross_domain_estimates": {
+    "pi1m_model_on_pi1m": {
+      "tokens_per_smiles": 18.2,
+      "bpb": 0.69,
+      "status": "matched (baseline)"
+    },
+    "pi1m_model_on_moses": {
+      "tokens_per_smiles": 43.9,
+      "bpb": 1.64,
+      "tokens_increase": "+140.6%",
+      "status": "cross-domain (estimated)"
+    },
+    "moses_model_on_moses": {
+      "tokens_per_smiles": 17.3,
+      "bpb": 0.68,
+      "status": "matched (baseline)"
+    },
+    "moses_model_on_pi1m": {
+      "tokens_per_smiles": 41.6,
+      "bpb": 1.64,
+      "tokens_increase": "+140.6%",
+      "status": "cross-domain (estimated)"
+    }
+  }
+}

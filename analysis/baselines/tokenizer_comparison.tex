@@ -1,0 +1,21 @@
+
+\begin{table}[t]
+\caption{Comprehensive comparison of tokenization approaches for chemical SMILES.}
+\label{tab:tokenizer_comparison}
+\vskip 0.1in
+\begin{center}
+\begin{small}
+\begin{tabular}{lcccccc}
+\toprule
+Tokenizer & Token Length & Vocab Size & Tok/SMILES (PI1M) & Tok/SMILES (MOSES) & Adaptability \\
+\midrule
+Character & 1.0 & 50-70 & 47.7 & 34.8 & None \\
+BPE & 3-4 chars & ~8K & ~14 & ~10 & Trained \\
+SmilesPE & 4-6 chars & 1.6-2K & 11.3 & 5.9 & Fixed \\
+H-Net & 2-3 chars & 6-8K & 16.6 & 17.3 & Adaptive \\
+\bottomrule
+\end{tabular}
+\end{small}
+\end{center}
+\vskip -0.1in
+\end{table}

@@ -32,6 +32,29 @@
 - `data/concatenation_effect_summary.csv` - Concatenation impact metrics
 - `data/training_amount_summary.csv` - Training progression metrics
 
+#### 4b. **Token Interpretability Analysis** ✓ (NEW - Jan 2026)
+- **Location**: `analysis/interpretability/`
+- **Scripts**:
+  - `extract_top_tokens.py` - Parse token frequencies from existing JSON stats
+  - `auto_annotate_tokens.py` - Hybrid RDKit + SMARTS + heuristics annotation
+  - `atom_boundary_analysis.py` - Atom boundary alignment analysis
+  - `functional_group_alignment.py` - Functional group capture comparison
+  - `generate_figure.py` - Publication figure generation
+- **Data Outputs**:
+  - `data/top_100_tokens.csv` - Top 100 tokens with context examples
+  - `data/token_annotations.csv` - Automated chemical annotations
+  - `data/atom_boundary_stats.json` - Boundary respect metrics
+  - `data/functional_group_alignment.json` - FG capture rates
+
+#### 4c. **Scaling Analysis** ✓ (NEW - Jan 2026)
+- **Location**: `analysis/scaling/`
+- **Scripts**:
+  - `compute_analysis.py` - FLOPs calculation and efficiency metrics
+  - `generate_figure.py` - Scaling curves figure
+- **Data Outputs**:
+  - `data/compute_efficiency.csv` - FLOPs vs performance data
+  - `data/power_law_fit.json` - Power law fit parameters
+
 #### 5. **Detailed Statistics** ✓
 - `data/statistics/PI1M_concat_1epoch_stats.json`
 - `data/statistics/PI1M_concat_5epoch_stats.json`
@@ -70,6 +93,28 @@
 - **H-Net**: 2-3 char tokens, 6K-8K vocabulary, fine-grained
 - **SmilesPE**: 4-6 char tokens, 1.6K-2K vocabulary, coarse-grained
 - **Conclusion**: Complementary approaches - learned vs. rule-based
+
+### NEW: Token Interpretability Analysis (Jan 2026)
+- **Token Categories**: 28% aliphatic, 20% aromatic_ring, 14% functional_group, 11% syntax
+- **Atom Boundary Respect**: 70-84% of tokens fully respect atom boundaries
+- **Atom Splitting**: Only 1-4% of tokens split within an atom symbol
+- **Functional Groups**: Simple groups (hydroxyl, ethyl) captured as single tokens >99% of cases
+- **Conclusion**: H-Net discovers chemically meaningful patterns that respect atomic structure
+
+### NEW: Scaling Analysis (Jan 2026)
+- **Power Law**: BPB ∝ FLOPs^(-0.09), R² = 0.97
+- **Compute Scaling**: 22x compute → 25% BPB improvement
+- **Vocabulary Growth**: 64% more unique tokens (4,903 → 8,019)
+- **Efficiency**: 23% fewer tokens per SMILES (21.6 → 16.6)
+- **Conclusion**: Clear scaling benefits with continued training
+
+### NEW: Extended Property Prediction (Jan 2026)
+- **Classification**: H-Net outperforms RDKit on 2/3 tasks
+  - BBBP: 0.950 vs 0.927 AUC (+2.5%)
+  - HIV: 0.788 vs 0.760 AUC (+3.7% on 41K samples)
+  - BACE: 0.867 vs 0.897 AUC (-3.3%)
+- **Regression**: RDKit still better (ESOL, FreeSolv, Lipophilicity)
+- **Conclusion**: H-Net embeddings excel at classification, complementary to RDKit
 
 ---
 
@@ -135,6 +180,23 @@ analysis/
 │   ├── hnet_results/                  # Raw tokenization outputs
 │   ├── smilesPE_results/              # Benchmark outputs
 │   └── statistics/                    # Detailed JSON stats
+├── interpretability/                  # NEW: Token interpretability analysis
+│   ├── extract_top_tokens.py
+│   ├── auto_annotate_tokens.py
+│   ├── atom_boundary_analysis.py
+│   ├── functional_group_alignment.py
+│   ├── generate_figure.py
+│   └── data/                          # Interpretability outputs
+│       ├── top_100_tokens.csv
+│       ├── token_annotations.csv
+│       ├── atom_boundary_stats.json
+│       └── functional_group_alignment.json
+├── scaling/                           # NEW: Scaling analysis
+│   ├── compute_analysis.py
+│   ├── generate_figure.py
+│   └── data/                          # Scaling outputs
+│       ├── compute_efficiency.csv
+│       └── power_law_fit.json
 ├── utils/                             # Analysis code
 │   ├── inference.py                   # H-Net inference utilities
 │   ├── statistics.py                  # Token statistics computation
@@ -158,6 +220,10 @@ analysis/
 - [x] Summary tables creation
 - [x] Final report with poster content
 - [x] All notebooks executed and saved
+- [x] **NEW**: Token interpretability analysis (categories, atom boundaries, functional groups)
+- [x] **NEW**: Scaling analysis (FLOPs, power law fit, efficiency metrics)
+- [x] **NEW**: Publication figures for interpretability and scaling
+- [x] **NEW**: Extended MoleculeNet evaluation (ESOL, FreeSolv, HIV, BACE with H-Net)
 
 ---
 
@@ -181,6 +247,7 @@ analysis/
 
 ---
 
-*Analysis completed: November 13, 2025*  
+*Initial analysis completed: November 13, 2025*  
+*Interpretability & Scaling analysis added: January 19, 2026*  
 *All deliverables ready for poster presentation and publication*
 

@@ -1,0 +1,101 @@
+rank,token,frequency,length,category,chemical_meaning,is_valid_smiles,atom_count,atoms,has_aromatic,matched_patterns,respects_atom_boundary,pattern_details
+1,(,16191,1,syntax,branch open,False,0,,False,,n/a,{'type': 'bracket'}
+2,c,13469,1,aromatic,carbon (aromatic),True,1,C,True,,yes,{'type': 'aromatic_atom'}
+3,*,10075,1,polymer_syntax,polymer attachment,False,0,,False,,n/a,{'type': 'attachment_point'}
+4,1,7350,1,ring_closure,ring closure 1,False,0,,False,,n/a,{'type': 'ring_digit'}
+5,O,5689,1,aliphatic,oxygen,True,1,O,False,,yes,{'type': 'aliphatic_atom'}
+6,C,5627,1,aliphatic,carbon (aliphatic),True,1,C,False,,partial,{'type': 'aliphatic_atom'}
+7,N,2982,1,aliphatic,nitrogen (aliphatic),True,1,N,False,,partial,{'type': 'aliphatic_atom'}
+8,*),2680,2,polymer_syntax,complex pattern,False,0,,False,,n/a,{'type': 'attachment_point'}
+9,C(,2513,2,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 1, 'bond': 0, 'ring': 0}"
+10,2)c,2485,3,aromatic_ring,complex pattern,False,0,,False,,partial,"{'aromatic': 1, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 1}"
+11,=,2462,1,bond,double bond,False,0,,False,,n/a,{'type': 'bond_symbol'}
+12,C),2005,2,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 1, 'bond': 0, 'ring': 0}"
+13,CC(,1987,3,aliphatic,alkyl chain,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 2, 'syntax': 1, 'bond': 0, 'ring': 0}"
+14,),1862,1,syntax,branch close,False,0,,False,,n/a,{'type': 'bracket'}
+15,c2ccc,1818,5,aromatic_ring,aromatic ring fragment,False,0,,False,,partial,"{'aromatic': 4, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 1}"
+16,Oc1ccc,1813,6,mixed,complex pattern,False,0,,False,,partial,"{'aromatic': 4, 'aliphatic': 1, 'syntax': 0, 'bond': 0, 'ring': 1}"
+17,O),1718,2,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 1, 'bond': 0, 'ring': 0}"
+18,C(=,1553,3,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 1, 'bond': 1, 'ring': 0}"
+19,CC,1440,2,aliphatic,ethyl chain,True,2,"C,C",False,,partial,"{'aromatic': 0, 'aliphatic': 2, 'syntax': 0, 'bond': 0, 'ring': 0}"
+20,C(=O),1418,5,functional_group,carbonyl,True,2,"C,O",False,carbonyl,yes,"{'aromatic': 0, 'aliphatic': 2, 'syntax': 2, 'bond': 1, 'ring': 0}"
+21,S,1391,1,aliphatic,sulfur,True,1,S,False,,partial,{'type': 'aliphatic_atom'}
+22,*c,1194,2,polymer_syntax,2-atom fragment,True,2,"*,C",True,,yes,{'type': 'attachment_point'}
+23,ccc,1138,3,aromatic,aromatic chain,True,3,"C,C,C",True,,yes,"{'aromatic': 3, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 0}"
+24,(C,1122,2,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 1, 'bond': 0, 'ring': 0}"
+25,*)c,1081,3,polymer_syntax,complex pattern,False,0,,False,,partial,{'type': 'attachment_point'}
+26,c(,1055,2,aromatic,complex pattern,False,0,,False,,partial,"{'aromatic': 1, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 0}"
+27,/,1038,1,bond,cis/trans (up),False,0,,False,,n/a,{'type': 'bond_symbol'}
+28,(-,1026,2,bond,complex pattern,False,0,,False,,n/a,"{'aromatic': 0, 'aliphatic': 0, 'syntax': 1, 'bond': 1, 'ring': 0}"
+29,F)(,981,3,syntax,fluorine,False,0,,False,fluorine,partial,"{'aromatic': 0, 'aliphatic': 0, 'syntax': 2, 'bond': 0, 'ring': 0}"
+30,=O),915,3,functional_group,carbonyl,False,0,,False,carbonyl,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 1, 'bond': 1, 'ring': 0}"
+31,2,880,1,ring_closure,ring closure 2,False,0,,False,,n/a,{'type': 'ring_digit'}
+32,c1ccc,797,5,aromatic_ring,benzene partial,False,0,,False,,partial,"{'aromatic': 4, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 1}"
+33,1ccc,763,4,aromatic_ring,complex pattern,False,0,,False,,partial,"{'aromatic': 3, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 1}"
+34,F)(F)C(,747,7,aliphatic,fluorine,False,0,,False,fluorine,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 4, 'bond': 0, 'ring': 0}"
+35,3)c,723,3,aromatic_ring,complex pattern,False,0,,False,,partial,"{'aromatic': 1, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 1}"
+36,],714,1,syntax,bracket atom close,False,0,,False,,n/a,{'type': 'bracket'}
+37,3)cc,691,4,aromatic_ring,complex pattern,False,0,,False,,partial,"{'aromatic': 2, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 1}"
+38,(=O),684,4,functional_group,carbonyl,False,0,,False,carbonyl,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 2, 'bond': 1, 'ring': 0}"
+39,(C),641,3,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 2, 'bond': 0, 'ring': 0}"
+40,i,631,1,complex,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 0}"
+41,)c,630,2,aromatic,complex pattern,False,0,,False,,partial,"{'aromatic': 1, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 0}"
+42,/C,623,2,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 0, 'bond': 1, 'ring': 0}"
+43,c3ccc,606,5,aromatic_ring,aromatic ring fragment,False,0,,False,,partial,"{'aromatic': 4, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 1}"
+44,OCC,588,3,aliphatic,3-atom fragment,True,3,"O,C,C",False,,partial,"{'aromatic': 0, 'aliphatic': 3, 'syntax': 0, 'bond': 0, 'ring': 0}"
+45,2),561,2,syntax,complex pattern,False,0,,False,,n/a,"{'aromatic': 0, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 1}"
+46,2)cc,533,4,aromatic_ring,complex pattern,False,0,,False,,partial,"{'aromatic': 2, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 1}"
+47,F)C(,524,4,aliphatic,fluorine,False,0,,False,fluorine,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 2, 'bond': 0, 'ring': 0}"
+48,cc,504,2,aromatic,aromatic bond,True,2,"C,C",True,,yes,"{'aromatic': 2, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 0}"
+49,F),480,2,syntax,fluorine,False,0,,False,fluorine,partial,"{'aromatic': 0, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 0}"
+50,O[,470,2,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 1, 'bond': 0, 'ring': 0}"
+51,(O,462,2,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 1, 'bond': 0, 'ring': 0}"
+52,c2cc,459,4,aromatic_ring,aromatic ring fragment,False,0,,False,,partial,"{'aromatic': 3, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 1}"
+53,3ccc,454,4,aromatic_ring,complex pattern,False,0,,False,,partial,"{'aromatic': 3, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 1}"
+54,(=,439,2,bond,complex pattern,False,0,,False,,n/a,"{'aromatic': 0, 'aliphatic': 0, 'syntax': 1, 'bond': 1, 'ring': 0}"
+55,c1,439,2,aromatic_ring,aromatic ring fragment,False,0,,False,,partial,"{'aromatic': 1, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 1}"
+56,CCCCCC,426,6,aliphatic,hexyl chain,True,6,"C,C,C,C,C,C",False,,partial,"{'aromatic': 0, 'aliphatic': 6, 'syntax': 0, 'bond': 0, 'ring': 0}"
+57,C(=O)N,407,6,functional_group,amide,True,3,"C,O,N",False,carbonyl,partial,"{'aromatic': 0, 'aliphatic': 3, 'syntax': 2, 'bond': 1, 'ring': 0}"
+58,S(,386,2,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 1, 'bond': 0, 'ring': 0}"
+59,c3cc,381,4,aromatic_ring,aromatic ring fragment,False,0,,False,,partial,"{'aromatic': 3, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 1}"
+60,*)=O)c,374,6,functional_group,carbonyl,False,0,,False,carbonyl,partial,{'type': 'attachment_point'}
+61,CCCC,368,4,aliphatic,butyl chain,True,4,"C,C,C,C",False,,partial,"{'aromatic': 0, 'aliphatic': 4, 'syntax': 0, 'bond': 0, 'ring': 0}"
+62,([,362,2,syntax,complex pattern,False,0,,False,,n/a,"{'aromatic': 0, 'aliphatic': 0, 'syntax': 2, 'bond': 0, 'ring': 0}"
+63,C(=O)c2ccc,354,10,functional_group,carbonyl,False,0,,False,carbonyl,partial,"{'aromatic': 4, 'aliphatic': 2, 'syntax': 2, 'bond': 1, 'ring': 1}"
+64,(/C,352,3,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 1, 'bond': 1, 'ring': 0}"
+65,=O,350,2,functional_group,carbonyl oxygen,False,0,,False,carbonyl,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 0, 'bond': 1, 'ring': 0}"
+66,N(,348,2,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 1, 'bond': 0, 'ring': 0}"
+67,F,338,1,element,fluorine,True,1,F,False,fluorine,partial,{'type': 'single_letter_element'}
+68,CCC,331,3,aliphatic,propyl chain,True,3,"C,C,C",False,,partial,"{'aromatic': 0, 'aliphatic': 3, 'syntax': 0, 'bond': 0, 'ring': 0}"
+69,i],330,2,syntax,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 0}"
+70,c1),326,3,aromatic_ring,aromatic ring fragment,False,0,,False,,partial,"{'aromatic': 1, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 1}"
+71,4cc,319,3,aromatic_ring,complex pattern,False,0,,False,,partial,"{'aromatic': 2, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 1}"
+72,=O)c,315,4,functional_group,carbonyl,False,0,,False,carbonyl,partial,"{'aromatic': 1, 'aliphatic': 1, 'syntax': 1, 'bond': 1, 'ring': 0}"
+73,c1cccc,314,6,aromatic_ring,aromatic ring fragment,False,0,,False,,partial,"{'aromatic': 5, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 1}"
+74,3),312,2,syntax,complex pattern,False,0,,False,,n/a,"{'aromatic': 0, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 1}"
+75,*)C(=O),294,7,functional_group,carbonyl,False,0,,False,carbonyl,partial,{'type': 'attachment_point'}
+76,OC,285,2,aliphatic,methoxy,True,2,"O,C",False,,partial,"{'aromatic': 0, 'aliphatic': 2, 'syntax': 0, 'bond': 0, 'ring': 0}"
+77,4)c,272,3,aromatic_ring,complex pattern,False,0,,False,,partial,"{'aromatic': 1, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 1}"
+78,*)cc,269,4,polymer_syntax,complex pattern,False,0,,False,,partial,{'type': 'attachment_point'}
+79,C(=O)O,267,6,functional_group,carboxyl,True,3,"C,O,O",False,carbonyl,yes,"{'aromatic': 0, 'aliphatic': 3, 'syntax': 2, 'bond': 1, 'ring': 0}"
+80,#,264,1,bond,triple bond,False,0,,False,,n/a,{'type': 'bond_symbol'}
+81,=O)cc,260,5,functional_group,carbonyl,False,0,,False,carbonyl,partial,"{'aromatic': 2, 'aliphatic': 1, 'syntax': 1, 'bond': 1, 'ring': 0}"
+82,)(,254,2,syntax,complex pattern,False,0,,False,,n/a,"{'aromatic': 0, 'aliphatic': 0, 'syntax': 2, 'bond': 0, 'ring': 0}"
+83,(=O)O,252,5,functional_group,carbonyl,False,0,,False,carbonyl,partial,"{'aromatic': 0, 'aliphatic': 2, 'syntax': 2, 'bond': 1, 'ring': 0}"
+84,(*)c,247,4,polymer_syntax,complex pattern,False,0,,False,,partial,{'type': 'attachment_point'}
+85,n,247,1,aromatic,nitrogen (aromatic),True,1,N,True,,partial,{'type': 'aromatic_atom'}
+86,CCCCC,246,5,aliphatic,pentyl chain,True,5,"C,C,C,C,C",False,,partial,"{'aromatic': 0, 'aliphatic': 5, 'syntax': 0, 'bond': 0, 'ring': 0}"
+87,[,241,1,syntax,bracket atom open,False,0,,False,,n/a,{'type': 'bracket'}
+88,=O)(,240,4,functional_group,carbonyl,False,0,,False,carbonyl,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 2, 'bond': 1, 'ring': 0}"
+89,c4)c,239,4,aromatic_ring,aromatic ring fragment,False,0,,False,,partial,"{'aromatic': 2, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 1}"
+90,Cc,236,2,mixed,C2 chain,True,2,"C,C",True,,yes,"{'aromatic': 1, 'aliphatic': 1, 'syntax': 0, 'bond': 0, 'ring': 0}"
+91,c5cc,233,4,aromatic_ring,aromatic ring fragment,False,0,,False,,partial,"{'aromatic': 3, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 1}"
+92,5)c,231,3,aromatic_ring,complex pattern,False,0,,False,,partial,"{'aromatic': 1, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 1}"
+93,O)c,223,3,mixed,complex pattern,False,0,,False,,partial,"{'aromatic': 1, 'aliphatic': 1, 'syntax': 1, 'bond': 0, 'ring': 0}"
+94,CCN,221,3,aliphatic,3-atom fragment,True,3,"C,C,N",False,,partial,"{'aromatic': 0, 'aliphatic': 3, 'syntax': 0, 'bond': 0, 'ring': 0}"
+95,=O)O,218,4,functional_group,carbonyl,False,0,,False,carbonyl,partial,"{'aromatic': 0, 'aliphatic': 2, 'syntax': 1, 'bond': 1, 'ring': 0}"
+96,(*,207,2,polymer_syntax,complex pattern,False,0,,False,,n/a,{'type': 'attachment_point'}
+97,)cc,207,3,aromatic,complex pattern,False,0,,False,,partial,"{'aromatic': 2, 'aliphatic': 0, 'syntax': 1, 'bond': 0, 'ring': 0}"
+98,*)c1,206,4,polymer_syntax,complex pattern,False,0,,False,,partial,{'type': 'attachment_point'}
+99,(C(,200,3,aliphatic,complex pattern,False,0,,False,,partial,"{'aromatic': 0, 'aliphatic': 1, 'syntax': 2, 'bond': 0, 'ring': 0}"
+100,3cc,199,3,aromatic_ring,complex pattern,False,0,,False,,partial,"{'aromatic': 2, 'aliphatic': 0, 'syntax': 0, 'bond': 0, 'ring': 1}"

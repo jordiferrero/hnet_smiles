@@ -1,0 +1,46 @@
+{
+  "PI1M_concat_22epoch": {
+    "total_samples": 1000,
+    "total_tokens": 13730,
+    "mean_tokens_per_smiles": 13.73,
+    "mean_atoms_per_smiles": 22.703,
+    "mean_respects_start_rate": 0.8562788368366024,
+    "mean_respects_end_rate": 0.7972820176128869,
+    "mean_fully_respects_rate": 0.6975803894376638,
+    "mean_splits_atom_rate": 0.040873712115889124,
+    "mean_atoms_per_token": 1.7850805497547058
+  },
+  "PI1M_concat_5epoch": {
+    "total_samples": 1000,
+    "total_tokens": 14780,
+    "mean_tokens_per_smiles": 14.78,
+    "mean_atoms_per_smiles": 22.703,
+    "mean_respects_start_rate": 0.8310713300166058,
+    "mean_respects_end_rate": 0.7679666757655415,
+    "mean_fully_respects_rate": 0.6618116050296688,
+    "mean_splits_atom_rate": 0.022006835977313996,
+    "mean_atoms_per_token": 1.741937184795715
+  },
+  "MOSES_concat_5epoch": {
+    "total_samples": 1000,
+    "total_tokens": 16834,
+    "mean_tokens_per_smiles": 16.834,
+    "mean_atoms_per_smiles": 20.348,
+    "mean_respects_start_rate": 0.9430875510895743,
+    "mean_respects_end_rate": 0.8949752084771319,
+    "mean_fully_respects_rate": 0.8440800104775644,
+    "mean_splits_atom_rate": 0.013572833121221858,
+    "mean_atoms_per_token": 1.2705043325833933
+  },
+  "PI1M_concat_5epoch_2stage": {
+    "total_samples": 1000,
+    "total_tokens": 19636,
+    "mean_tokens_per_smiles": 19.636,
+    "mean_atoms_per_smiles": 22.703,
+    "mean_respects_start_rate": 0.862709440834155,
+    "mean_respects_end_rate": 0.8130668919719358,
+    "mean_fully_respects_rate": 0.71199212563259,
+    "mean_splits_atom_rate": 0.026502200736472383,
+    "mean_atoms_per_token": 1.3161921191653596
+  }
+}

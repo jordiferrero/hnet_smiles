@@ -1,0 +1,26 @@
+{
+  "Aspect": [
+    "Training Required",
+    "Training Time (5 epochs)",
+    "Training Hardware",
+    "Inference Throughput",
+    "Inference Memory",
+    "Adaptability"
+  ],
+  "H-Net": [
+    "Yes",
+    "~18 hours",
+    "1x A10G GPU (24GB)",
+    "~1K SMILES/sec (GPU)",
+    "~15-20 GB GPU",
+    "Per-dataset"
+  ],
+  "SmilesPE": [
+    "No (pre-trained)",
+    "N/A",
+    "N/A",
+    "~50K SMILES/sec (CPU)",
+    "< 1 GB CPU",
+    "Fixed vocabulary"
+  ]
+}

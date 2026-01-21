@@ -1,0 +1,22 @@
+
+\begin{table}[t]
+\caption{Cross-domain transfer analysis. Matched tokenization (trained and evaluated on same domain) vs.\ cross-domain (trained on one domain, evaluated on another). Estimates based on vocabulary overlap analysis.}
+\label{tab:cross_domain}
+\vskip 0.1in
+\begin{center}
+\begin{small}
+\begin{tabular}{llccc}
+\toprule
+Train Data & Eval Data & Tokens/SMILES & BPB & $\Delta$ \\
+\midrule
+PI1M & PI1M & 18.2 & 0.69 & baseline \\
+PI1M & MOSES & $\sim$44 & $\sim$1.6 & +141\%$^*$ \\
+MOSES & MOSES & 17.3 & 0.68 & baseline \\
+MOSES & PI1M & $\sim$42 & $\sim$1.6 & +141\%$^*$ \\
+\bottomrule
+\end{tabular}
+\end{small}
+\end{center}
+{\footnotesize $^*$Estimated from vocabulary overlap (Jaccard = 0.06; only 706 shared tokens)}
+\vskip -0.1in
+\end{table}

@@ -1,0 +1,26 @@
+
+**BPE Baseline Comparison:**
+
+We compare H-Net against three tokenization baselines to contextualize our results:
+
+1. **Character-level tokenization** treats each character independently, producing ~48 tokens 
+   for typical polymer SMILES and ~35 for drug-like molecules. While simple, this approach 
+   ignores chemical semantics entirely.
+
+2. **Standard BPE** (Byte Pair Encoding) learns subword units from data, typically achieving 
+   3-4 character tokens with vocabulary sizes around 8K. When applied to SMILES, BPE 
+   compresses sequences to ~14 tokens for polymers and ~10 for molecules, providing 
+   reasonable efficiency without chemistry-specific priors.
+
+3. **SmilesPE** applies chemistry-aware pair encoding pre-trained on ChEMBL, achieving 
+   longer tokens (4-6 characters) and smaller vocabularies (1.6-2K). Its fixed vocabulary 
+   excels at compression (11 tokens for polymers, 6 for molecules) but cannot adapt to 
+   domain-specific patterns.
+
+4. **H-Net** learns finer-grained tokens (2-3 characters) with larger vocabularies (6-8K), 
+   producing more tokens per SMILES but enabling adaptive, dataset-specific tokenization.
+
+The key insight is that H-Net and SmilesPE embody different trade-offs: SmilesPE prioritizes 
+compression with a fixed, chemistry-aware vocabulary, while H-Net prioritizes adaptability 
+with a learned, dataset-specific vocabulary. Standard BPE falls between these approaches, 
+offering moderate compression without chemistry-specific priors.
