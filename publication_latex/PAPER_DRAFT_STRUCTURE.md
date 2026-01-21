@@ -323,3 +323,6 @@ H-Net outperforms RDKit on BBBP classification by +2.3% AUC
 *Page estimate: Main paper ~8 pages + references + appendix*
 
 
+
+
+

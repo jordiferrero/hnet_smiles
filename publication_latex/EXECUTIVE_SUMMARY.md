@@ -31,6 +31,17 @@
 | Lipophilicity (MAE) | 0.682 | 0.494 | RDKit |
 | MAC (MAE) | 10.3e-5 | 5.7e-5 | RDKit |
 
+### Extended MoleculeNet Results (NEW - Jan 2026)
+
+| Task | RDKit | H-Net | Winner |
+|------|-------|-------|--------|
+| HIV (AUC) | 0.760 | **0.788** | H-Net ✓ |
+| BACE (AUC) | **0.897** | 0.867 | RDKit |
+| ESOL (RMSE) | **0.660** | 0.910 | RDKit |
+| FreeSolv (RMSE) | **1.131** | 2.183 | RDKit |
+
+**Key Finding**: H-Net wins on 2/4 classification tasks (BBBP, HIV) but RDKit wins on regression.
+
 ---
 
 ## 🔬 Experimental Setup Summary
@@ -74,17 +85,23 @@ Architecture: 1-stage | 2-stage
 
 ## 🔴 Critical Gaps to Address
 
-| Priority | Gap | Effort | Impact |
-|----------|-----|--------|--------|
-| **MUST** | BPE baseline comparison | 2 days | High |
-| **MUST** | Statistical significance tests | 1 day | Medium |
-| **MUST** | Compute cost analysis | 0.5 days | Medium |
-| **MUST** | Cross-domain transfer | 1 day | High |
-| SHOULD | More MoleculeNet tasks | 2 days | High |
-| SHOULD | Token interpretability | 2 days | High |
-| SHOULD | Error analysis | 1.5 days | Medium |
+| Priority | Gap | Effort | Impact | Status |
+|----------|-----|--------|--------|--------|
+| **MUST** | BPE baseline comparison | 2 days | High | ⏳ TODO |
+| **MUST** | Statistical significance tests | 1 day | Medium | ✅ DONE (Jan 2026) |
+| **MUST** | Compute cost analysis | 0.5 days | Medium | ✅ DONE (Jan 2026) |
+| **MUST** | Cross-domain transfer | 1 day | High | ⏳ TODO |
+| SHOULD | More MoleculeNet tasks | 2 days | High | ✅ DONE (RDKit baselines for 6 tasks) |
+| SHOULD | Token interpretability | 2 days | High | ✅ DONE (Jan 2026) |
+| SHOULD | Error analysis | 1.5 days | Medium | ⏳ TODO |
 
-**Total estimated effort: ~10 days**
+**Completed (Jan 19, 2026):**
+- ✅ Token interpretability: Categories, atom boundary analysis, functional group alignment
+- ✅ Scaling analysis: FLOPs calculation, power law fit (BPB ∝ FLOPs^-0.09)
+- ✅ Extended MoleculeNet: RDKit baselines for ESOL, FreeSolv, HIV, BACE, ClinTox, Tox21
+- ✅ Statistical tests: Bootstrap CIs, figures generated
+
+**Remaining effort: ~4 days**
 
 ---
 
@@ -93,8 +110,11 @@ Architecture: 1-stage | 2-stage
 1. **Novel angle**: First systematic study of learned tokenization for chemistry
 2. **Surprising insight**: 30% token overlap between polymer/molecular (like Mandarin vs. English)
 3. **Quantitative rigor**: Comprehensive metrics suite with statistical backing
-4. **Practical utility**: Embeddings work for property prediction (BBBP outperforms RDKit)
-5. **Reproducibility**: All configs and code documented
+4. **Practical utility**: H-Net embeddings outperform RDKit on **2 major classification tasks**:
+   - BBBP: +2.5% AUC (0.950 vs 0.927)
+   - HIV: +3.7% AUC (0.788 vs 0.760) on 41K samples
+5. **Interpretability**: 70-84% of tokens respect atom boundaries, chemically meaningful patterns
+6. **Reproducibility**: All configs and code documented
 
 ---
 
@@ -153,6 +173,7 @@ Architecture: 1-stage | 2-stage
 
 ---
 
-*Summary prepared: January 17, 2026*
+*Summary prepared: January 17, 2026*  
+*Updated with interpretability & scaling analysis: January 19, 2026*
 
 

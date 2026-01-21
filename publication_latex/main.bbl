@@ -1,4 +1,4 @@
-\begin{thebibliography}{10}
+\begin{thebibliography}{12}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -49,12 +49,26 @@ Krenn, M., H{\"a}se, F., Nigam, A., Friederich, P., and Aspuru-Guzik, A.
 \newblock \emph{Machine Learning: Science and Technology}, 1\penalty0
   (4):\penalty0 045024, 2020.
 
+\bibitem[Kuenneth \& Ramprasad(2023)Kuenneth and
+  Ramprasad]{kuenneth2023polybert}
+Kuenneth, C. and Ramprasad, R.
+\newblock {polyBERT}: A chemical language model to enable fully machine-driven
+  ultrafast polymer informatics.
+\newblock \emph{Nature Communications}, 14\penalty0 (1):\penalty0 4099, 2023.
+
 \bibitem[Li \& Fourches(2021)Li and Fourches]{li2020smilespe}
 Li, X. and Fourches, D.
 \newblock {SMILES} pair encoding: A data-driven substructure tokenization
   algorithm for deep learning.
 \newblock \emph{Journal of Chemical Information and Modeling}, 61\penalty0
   (4):\penalty0 1560--1569, 2021.
+
+\bibitem[Sutton(2019)]{sutton2019bitter}
+Sutton, R.~S.
+\newblock The bitter lesson.
+\newblock \url{http://www.incompleteideas.net/IncIdeas/BitterLesson.html},
+  2019.
+\newblock Accessed: 2026-01-20.
 
 \bibitem[Wang et~al.(2022)]{wang2022blt}
 Wang, Y. et~al.
