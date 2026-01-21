@@ -1,0 +1,11 @@
+Dataset,Domain,Task,Metric,RDKit,H-Net
+BBBP,Molecular,Classification,AUC,0.927,0.950
+HIV,Molecular,Classification,AUC,0.759,-
+BACE,Molecular,Classification,AUC,0.897,-
+CLINTOX,Molecular,Classification,AUC,0.865,-
+TOX21,Molecular,Classification,AUC,0.804,-
+Lipophilicity,Molecular,Regression,MAE,0.4939,0.6820
+ESOL,Molecular,Regression,RMSE,0.6596,-
+FREESOLV,Molecular,Regression,RMSE,1.1307,-
+Tg,Polymer,Regression,MAE,24.8252,26.6092
+MAC,Polymer,Regression,MAE,0.0001,0.0001

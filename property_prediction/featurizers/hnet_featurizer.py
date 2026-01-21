@@ -18,6 +18,10 @@ import sys
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+# Add original_resources directory where hnet module lives
+HNET_REPO_DIR = PROJECT_ROOT / 'original_resources' / 'hnet-github-repo'
+sys.path.insert(0, str(HNET_REPO_DIR))
+
 from hnet.models.mixer_seq import HNetForCausalLM
 from hnet.models.config_hnet import AttnConfig, SSMConfig, HNetConfig
 from hnet.utils.tokenizers import ByteTokenizer

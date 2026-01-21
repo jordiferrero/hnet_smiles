@@ -1,0 +1,13 @@
+Dataset,Domain,Task,Metric,RDKit,H-Net,Winner,Delta
+BBBP,Molecular,Classification,AUC,0.927,0.950,H-Net,+2.5%
+HIV,Molecular,Classification,AUC,0.760,0.788,H-Net,+3.7%
+BACE,Molecular,Classification,AUC,0.897,0.867,RDKit,-3.3%
+ClinTox,Molecular,Classification,AUC,0.865,-,-,-
+Tox21,Molecular,Classification,AUC,0.804,-,-,-
+Lipophilicity,Molecular,Regression,MAE,0.494,0.682,RDKit,-38%
+ESOL,Molecular,Regression,RMSE,0.660,0.910,RDKit,-38%
+FreeSolv,Molecular,Regression,RMSE,1.131,2.183,RDKit,-93%
+Tg,Polymer,Regression,MAE,24.83,26.61,RDKit,-7%
+MAC,Polymer,Regression,MAE,5.7e-5,10.3e-5,RDKit,-81%
+
+

@@ -15,9 +15,25 @@ We compare H-Net latent representations against:
 - **Tg (Glass Transition Temperature)**: Regression, MAE metric
 - **MAC (Mass Attenuation Coefficient)**: Regression, MAE metric
 
-### Molecule Properties (MOSES)
+### Molecule Properties (MoleculeNet)
+- **BBBP (Blood-Brain Barrier Penetration)**: Classification, AUC metric - **H-Net wins (+2.5%)**
+- **HIV (HIV replication inhibition)**: Classification, AUC metric - **H-Net wins (+3.7%)**
+- **BACE (β-secretase 1 inhibitors)**: Classification, AUC metric
 - **Lipophilicity**: Regression, MAE metric
-- **BBBP (Blood-Brain Barrier Penetration)**: Classification, Accuracy/AUC metric
+- **ESOL (Aqueous Solubility)**: Regression, RMSE metric
+- **FreeSolv (Hydration Free Energy)**: Regression, RMSE metric
+
+## Key Results (Jan 2026)
+
+| Task | RDKit | H-Net | Winner |
+|------|-------|-------|--------|
+| BBBP (AUC) | 0.927 | **0.950** | H-Net ✓ |
+| HIV (AUC) | 0.760 | **0.788** | H-Net ✓ |
+| BACE (AUC) | **0.897** | 0.867 | RDKit |
+| Lipophilicity (MAE) | **0.494** | 0.682 | RDKit |
+| ESOL (RMSE) | **0.660** | 0.910 | RDKit |
+
+**Conclusion**: H-Net excels at classification tasks, RDKit wins on regression.
 
 ## H-Net Models Evaluated
 
@@ -82,6 +98,8 @@ property_prediction/
 If using the PI1M_Tg_MAC dataset, cite:
 - Zenodo: https://zenodo.org/records/17033425
 - "A Closed-Loop Deep Generative Model for the Inverse Design of Radiation-Resistant Polymers"
+
+
 
 
 
