@@ -1,0 +1,5 @@
+Metric,Concat (1→5 epoch),Concat (5→22 epoch),Concat (1→22 epoch)
+Token Overlap Jaccard,0.3889,0.3514,0.3333
+Breakpoint Overlap Jaccard,0.8222,0.8636,0.9130
+Mean Token Length Diff,0.4109,0.2581,0.6690
+KL Divergence,1.9468,1.9030,2.0447

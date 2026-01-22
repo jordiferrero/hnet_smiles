@@ -36,12 +36,10 @@ logs/
 
 # Large directories (model checkpoints, analysis data)
 /checkpoints/
-/analysis/data/
 /analysis/logs/
 
 # Pickle files (large binary data)
-*.pkl
-*.pkl.gz
+
 
 # LaTeX auxiliary files
 *.aux

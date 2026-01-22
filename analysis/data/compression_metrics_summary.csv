@@ -1,0 +1,9 @@
+Model,Dataset,Concatenation,Epochs,Architecture,Final BPB,Final PPL,Best BPB,Training Bytes
+PI1M_noconcat_5epoch,PI1M,No,5,1-stage,0.670,1.59,0.668,"242,699,738"
+PI1M_concat_1epoch,PI1M,Yes,1,1-stage,0.831,1.78,0.831,"47,653,402"
+PI1M_concat_5epoch,PI1M,Yes,5,1-stage,0.687,1.61,0.683,"238,267,018"
+PI1M_concat_22epoch,PI1M,Yes,22,1-stage,0.639,1.56,0.623,"1,048,374,856"
+MOSES_noconcat_5epoch,MOSES,No,5,1-stage,0.658,1.58,0.654,"366,824,276"
+MOSES_concat_5epoch,MOSES,Yes,5,1-stage,0.682,1.60,0.678,"358,148,627"
+PI1M_concat_5epoch_2stage,PI1M,Yes,5,2-stage,0.686,1.61,0.681,"238,267,014"
+MOSES_concat_5epoch_2stage,MOSES,Yes,5,2-stage,0.679,1.60,0.674,"358,148,610"

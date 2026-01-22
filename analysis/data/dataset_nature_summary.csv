@@ -1,0 +1,5 @@
+Metric,Non-concatenated,Concatenated
+Jaccard Similarity (Tokens),0.2987,0.3333
+KL Divergence,3.9149,4.2676
+Mean Token Length Diff,-0.2785,-0.6040
+Jaccard Similarity (Breakpoints),0.5714,0.5897

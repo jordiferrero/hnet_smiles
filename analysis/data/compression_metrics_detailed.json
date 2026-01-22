@@ -1,0 +1,90 @@
+{
+  "PI1M_noconcat_5epoch": {
+    "final_bpb": 0.6697113975302491,
+    "final_perplexity": 1.5907547147612187,
+    "best_bpb": 0.6681648386709708,
+    "best_perplexity": 1.5890503506771925,
+    "total_training_bytes": 242699738,
+    "dataset": "PI1M",
+    "architecture": "1-stage",
+    "epochs": 5,
+    "concatenate": false
+  },
+  "PI1M_concat_1epoch": {
+    "final_bpb": 0.8308215356390665,
+    "final_perplexity": 1.7786979448510236,
+    "best_bpb": 0.8308215356390665,
+    "best_perplexity": 1.7786979448510236,
+    "total_training_bytes": 47653402,
+    "dataset": "PI1M",
+    "architecture": "1-stage",
+    "epochs": 1,
+    "concatenate": true
+  },
+  "PI1M_concat_5epoch": {
+    "final_bpb": 0.687342399795315,
+    "final_perplexity": 1.6103144113728654,
+    "best_bpb": 0.6828380825040863,
+    "best_perplexity": 1.605294600844892,
+    "total_training_bytes": 238267018,
+    "dataset": "PI1M",
+    "architecture": "1-stage",
+    "epochs": 5,
+    "concatenate": true
+  },
+  "PI1M_concat_22epoch": {
+    "final_bpb": 0.6385331540366085,
+    "final_perplexity": 1.556745548704067,
+    "best_bpb": 0.6228781006878606,
+    "best_perplexity": 1.5399442266741115,
+    "total_training_bytes": 1048374856,
+    "dataset": "PI1M",
+    "architecture": "1-stage",
+    "epochs": 22,
+    "concatenate": true
+  },
+  "MOSES_noconcat_5epoch": {
+    "final_bpb": 0.6583692996035378,
+    "final_perplexity": 1.5782976410188436,
+    "best_bpb": 0.6544256313407456,
+    "best_perplexity": 1.5739891886321675,
+    "total_training_bytes": 366824276,
+    "dataset": "MOSES",
+    "architecture": "1-stage",
+    "epochs": 5,
+    "concatenate": false
+  },
+  "MOSES_concat_5epoch": {
+    "final_bpb": 0.6822323695901096,
+    "final_perplexity": 1.604620762263438,
+    "best_bpb": 0.6784411735953344,
+    "best_perplexity": 1.600409584268069,
+    "total_training_bytes": 358148627,
+    "dataset": "MOSES",
+    "architecture": "1-stage",
+    "epochs": 5,
+    "concatenate": true
+  },
+  "PI1M_concat_5epoch_2stage": {
+    "final_bpb": 0.6859597760006809,
+    "final_perplexity": 1.6087718868454712,
+    "best_bpb": 0.6810471565611285,
+    "best_perplexity": 1.6033030642075368,
+    "total_training_bytes": 238267014,
+    "dataset": "PI1M",
+    "architecture": "2-stage",
+    "epochs": 5,
+    "concatenate": true
+  },
+  "MOSES_concat_5epoch_2stage": {
+    "final_bpb": 0.6794290368108339,
+    "final_perplexity": 1.6015058153596025,
+    "best_bpb": 0.6736860774730404,
+    "best_perplexity": 1.5951433474102037,
+    "total_training_bytes": 358148610,
+    "dataset": "MOSES",
+    "architecture": "2-stage",
+    "epochs": 5,
+    "concatenate": true
+  }
+}
