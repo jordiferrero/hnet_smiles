@@ -1,10 +1,62 @@
-/.DS_Store
-/checkpoints
-/logs
-*.pyc
-/analysis/data
+# System files
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+*.egg
+.mypy_cache/
+.pytest_cache/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# Logs
 *.log
+logs/
+
+# Large directories (model checkpoints, analysis data)
+/checkpoints/
+/analysis/data/
+/analysis/logs/
+
+# Pickle files (large binary data)
 *.pkl
+*.pkl.gz
+
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.blg
+*.out
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.toc
+*.lof
+*.lot
+
+# Temporary directories
+temp/
 
 # Large data files (exceed GitHub limits)
 datasets/moses/smiles-molecules-moses_all.csv
