@@ -1,535 +1,356 @@
-# HNet SMILES Training
+# Learning Chemical Grammar: Dynamic Tokenization for SMILES with H-Net
 
-Training pipeline for HNet (Hierarchical Network) on SMILES (Simplified Molecular Input Line Entry System) polymer and molecular data, with automatic visualization of dynamic chunking behavior during training.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
 
-## Training Evolution Visualizations
+This repository contains the code, trained models, and analysis for **"Learning Chemical Grammar: Dynamic Tokenization for SMILES with Hierarchical Networks"** (ICML 2026 submission).
 
-The following GIFs show how HNet learns to tokenize SMILES strings during training. Both models were trained under identical conditions (5 epochs, no concatenation) on different datasets:
+## 📄 Paper Abstract
 
-### Molecular Dataset (MOSES)
-![Molecular Training Evolution](static/training_evolution_molecular.gif)
+Tokenization fundamentally shapes how machine learning models represent chemical structures. We investigate **dynamic tokenization** using Hierarchical Networks (H-Net), which learn byte-level chunking patterns directly from data. Our key findings:
 
-### Polymer Dataset (PI1M)
-![Polymer Training Evolution](static/training_evolution_polymer.gif)
+| Finding | Result |
+|---------|--------|
+| **Dataset Specificity** | Only 30% token overlap between polymer and molecular vocabularies |
+| **Training Dynamics** | 63% more unique tokens, 23% higher efficiency with extended training |
+| **Downstream Performance** | H-Net embeddings outperform RDKit on BBBP (AUC 0.95 vs 0.93) and HIV (AUC 0.79 vs 0.76) |
 
-*Dynamic chunking behavior evolution during HNet training. The visualizations show boundary predictions at different training checkpoints, demonstrating how the model learns to segment SMILES strings into meaningful tokens.*
+## 🎬 Training Evolution Visualizations
 
-## Quick Start
+H-Net learns to tokenize SMILES strings dynamically during training:
 
-**Three simple steps:**
+| Molecular Dataset (MOSES) | Polymer Dataset (PI1M) |
+|---------------------------|------------------------|
+| ![Molecular](static/training_evolution_molecular.gif) | ![Polymer](static/training_evolution_polymer.gif) |
 
-1. **Edit config file**: `configs/hnet_smiles_large.json` (or `hnet_smiles_small.json` for testing)
-2. **Activate environment**: `cd /home/ec2-user/hnet_smiles && source /opt/pytorch/bin/activate`
-3. **Run training**: `python train_smiles.py --config configs/hnet_smiles_large.json`
+---
 
-Training automatically generates checkpoints and visualizations upon completion!
+## 📁 Project Structure
 
-## Overview
-
-This project implements a complete training pipeline for HNet on SMILES data with:
-
-- **Config-based training**: All parameters in JSON configs - minimal command-line arguments needed
-- **Intelligent checkpointing**: 
-  - Boundary predictions saved to compressed pickle files at regular byte intervals
-  - Model checkpoints only saved when training loss improves (saves disk space)
-- **Automatic visualization**: Training evolution GIFs generated automatically at the end
-- **Hierarchical learning rate modulation**: Different learning rates for encoder/decoder vs. main network
-- **Graceful shutdown**: Signal handling for SSH disconnections and clean checkpoint saving
-- **Resume capability**: Resume training from any checkpoint
-
-## Installation
-
-### On EC2 Instance (Pre-configured)
-
-If you're working on the EC2 instance with pre-configured PyTorch environment:
-
-```bash
-source /opt/pytorch/bin/activate
-python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA: {torch.cuda.is_available()}')"
-```
-
-### Local Setup (Mac/Linux)
-
-For local installation from scratch:
-
-1. **Create Virtual Environment**:
-   ```bash
-   cd setup
-   ./setup_env.sh
-   source ../venv/bin/activate
-   ```
-
-2. **Verify Installation**:
-   ```bash
-   python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'Device: {torch.cuda.is_available() or torch.backends.mps.is_available()}')"
-   ```
-
-The setup script automatically detects your platform (Mac M-chip, CUDA, or CPU) and installs the appropriate dependencies. See `setup/README.md` for detailed instructions and troubleshooting.
-
-## Project Structure
+This project has **three main components**:
 
 ```
 hnet_smiles/
-├── configs/                # Model configurations (edit these!)
-│   ├── hnet_smiles_small.json  # Small config for testing
-│   └── hnet_smiles_large.json  # Large config for full training
-├── data/                   # Data loading modules
-│   ├── analyze_smiles.py   # SMILES data analysis utilities
-│   └── smiles_dataset.py   # PyTorch dataset implementation
-├── datasets/               # Actual data files
-│   ├── PI1M/
-│   │   └── PI1M_v2.csv     # Polymer SMILES dataset (~995K entries)
-│   └── moses/
-│       └── smiles-molecules-moses_all.csv  # Molecular SMILES dataset
-├── visualizations/         # Visualization tools
-│   ├── visualize_training_evolution.py  # Training evolution GIFs
-│   ├── visualize_stats.py              # Training statistics plots
-│   └── utils.py                        # Visualization utilities
-├── analysis/               # Analysis notebooks and reports
-│   ├── notebooks/          # Jupyter notebooks for analysis
-│   ├── data/              # Analysis results and statistics
-│   ├── figures/           # Generated figures
-│   └── FINAL_REPORT.md    # Comprehensive analysis report
-├── static/                 # Static assets for README
-│   ├── training_evolution_molecular.gif  # Molecular dataset training visualization
-│   └── training_evolution_polymer.gif    # Polymer dataset training visualization
-├── train_smiles.py        # Main training script
-├── generate_smiles.py     # SMILES generation script
-└── checkpoints/           # Training outputs (created automatically)
-    └── run_{phase}_{timestamp}/
-        ├── checkpoints/   # Model checkpoints
-        │   ├── checkpoint_epoch_*.pt  # Epoch checkpoints
-        │   └── checkpoint_bytes_best.pt  # Best checkpoint
-        ├── visualizations/
-        │   ├── predictions/  # Compressed pickle files with boundary predictions
-        │   │   └── predictions_bytes_*.pkl.gz
-        │   ├── training_evolution_batch_1.gif  # Batch 1 visualization
-        │   ├── training_evolution_batch_2.gif  # Batch 2 visualization
-        │   └── ...                             # Additional batch visualizations
-        ├── metadata.json      # Training metadata and history
-        ├── test_smiles.txt    # Test SMILES used for visualization
-        └── run_purpose.txt    # Purpose/notes for this run
+├── Part A: Training ─────────────────────────────────────────────
+│   ├── train_smiles.py          # Main training script
+│   ├── generate_smiles.py       # SMILES generation
+│   ├── configs/                 # Model configurations
+│   ├── data/                    # Data loading modules
+│   ├── datasets/                # PI1M and MOSES datasets
+│   ├── visualizations/          # Training visualization tools
+│   └── checkpoints/             # Trained models (gitignored)
+│
+├── Part B: Tokenization Analysis ────────────────────────────────
+│   └── analysis/
+│       ├── notebooks/           # Jupyter notebooks (01-08)
+│       ├── utils/               # Inference and statistics utilities
+│       ├── interpretability/    # Token interpretability analysis
+│       ├── scaling/             # Scaling behavior analysis
+│       ├── baselines/           # SmilesPE and BPE comparisons
+│       └── FINAL_REPORT.md      # Comprehensive analysis report
+│
+├── Part C: Property Prediction ──────────────────────────────────
+│   └── property_prediction/
+│       ├── featurizers/         # H-Net and RDKit feature extraction
+│       ├── models/              # XGBoost predictors
+│       ├── scripts/             # Experiment automation
+│       ├── experiments/         # Jupyter notebooks
+│       └── results/             # Tables and figures
+│
+└── Publication ──────────────────────────────────────────────────
+    └── publication_latex/       # ICML 2026 paper source
 ```
 
-## Usage
+---
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/jordiferrero/hnet_smiles.git
+cd hnet_smiles
+
+# Create virtual environment
+cd setup
+./setup_env.sh
+source ../venv/bin/activate
+
+# Verify installation
+python -c "import torch; print(f'PyTorch: {torch.__version__}')"
+```
+
+The setup script auto-detects your platform (CUDA, Mac M-chip, or CPU).
+
+### Download Datasets
+
+```bash
+# PI1M polymer dataset (~995K SMILES)
+# Already included: datasets/PI1M/PI1M_v2.csv
+
+# MOSES molecular dataset (download separately due to size)
+# See datasets/moses/README.md for instructions
+```
+
+---
+
+## Part A: Training H-Net on Chemical Data
+
+Train H-Net models to learn dynamic tokenization from SMILES strings.
 
 ### Basic Training
 
-1. **Edit the config file** (`configs/hnet_smiles_large.json` or `hnet_smiles_small.json`):
-   - Adjust model architecture, training parameters, dataset path, etc.
-   - All training parameters are in the `training_config` section
-
-2. **Activate the virtual environment**:
-   ```bash
-   cd /home/ec2-user/hnet_smiles
-   source /opt/pytorch/bin/activate
-   ```
-
-3. **Run training**:
-   ```bash
-   python train_smiles.py --config configs/hnet_smiles_large.json
-   ```
-
-### Running Training in Background (SSH Disconnection Safe)
-
-For long-running training sessions, use `nohup` to prevent termination when SSH disconnects:
-
 ```bash
-nohup python train_smiles.py --config configs/hnet_smiles_large.json > training.log 2>&1 &
+# Edit configuration
+nano configs/hnet_smiles_large.json
+
+# Run training (GPU recommended)
+python train_smiles.py --config configs/hnet_smiles_large.json
 ```
 
-**Monitor progress** (when reconnected):
-```bash
-# View live log output
-tail -f training.log
+### Available Configurations
 
-# Check if training is still running
-ps aux | grep train_smiles.py
+| Config | Model Size | Use Case |
+|--------|------------|----------|
+| `hnet_smiles_small.json` | ~50M params | Testing, debugging |
+| `hnet_smiles_large.json` | ~350M params | Full training |
+| `hnet_smiles_2stage_large.json` | ~350M params | Hierarchical architecture |
 
-# View latest checkpoint directory
-ls -lth checkpoints/ | head -5
-
-# View training metadata
-cat checkpoints/run_*/metadata.json | tail -20
-```
-
-**Stop training** (if needed):
-```bash
-# Find the process ID
-ps aux | grep train_smiles.py
-
-# Kill the process (replace PID with actual process ID)
-kill PID
-```
-
-The training script includes signal handlers for graceful shutdown - it will save a checkpoint before exiting when receiving SIGTERM or SIGINT.
-
-### Resuming Training
-
-To resume from a checkpoint:
-
-```bash
-python train_smiles.py --config configs/hnet_smiles_large.json \
-    --resume checkpoints/run_large_20251110_164118/checkpoints/checkpoint_epoch_3.pt
-```
-
-The script will automatically:
-- Restore model and optimizer state
-- Resume from the correct epoch
-- Continue tracking cumulative training bytes
-- Preserve best loss tracking
-
-### Command-Line Arguments
-
-While all parameters are in the config file, you can override them via command-line:
-
-```bash
-python train_smiles.py --config configs/hnet_smiles_large.json \
-    --batch-size 32 \
-    --epochs 10 \
-    --lr 0.0002 \
-    --checkpoint-bytes 2000000
-```
-
-See `python train_smiles.py --help` for all available arguments.
-
-## Configuration
-
-### Model Architecture
-
-Model configurations are in JSON format with two main sections:
-
-#### Architecture Parameters
-
-- `arch_layout`: Network architecture layout (e.g., `["m4", ["T22"], "m4"]` for 1-stage)
-- `d_model`: Model dimensions for each stage (e.g., `[1024, 1536]`)
-- `d_intermediate`: Intermediate dimensions for MLP layers (e.g., `[0, 4096]`)
-- `vocab_size`: Vocabulary size (256 for ByteTokenizer)
-- `ssm_cfg`: State Space Model configuration
-  - `chunk_size`: Chunk size for SSM processing
-  - `d_conv`: Convolution dimension
-  - `d_state`: State dimension
-  - `expand`: Expansion factor
-- `attn_cfg`: Attention configuration
-  - `num_heads`: Number of attention heads per stage
-  - `rotary_emb_dim`: Rotary embedding dimension per stage
-  - `window_size`: Attention window size per stage (-1 for full attention)
-
-#### Training Configuration
-
-All training parameters are in the `training_config` section:
-
-- `data`: Path to SMILES CSV file
-- `phase`: Training phase identifier (small/medium/large)
-- `max_samples`: Maximum number of samples (null = all)
-- `batch_size`: Batch size for training
-- `epochs`: Number of training epochs
-- `lr`: Learning rate
-- `weight_decay`: Weight decay for optimizer
-- `gradient_accumulation`: Gradient accumulation steps
-- `concatenate`: Whether to concatenate multiple SMILES
-- `num_concatenate`: Number of SMILES to concatenate (if concatenate=true)
-- `concatenate_separator`: Separator between concatenated SMILES
-- `checkpoint_bytes`: Save predictions every N training bytes
-- `num_test_samples`: Total number of test samples to evaluate
-- `num_visualize`: Number of samples to visualize in GIF
-- `skip_visualization`: Skip visualization generation (default: false)
-- `output_dir`: Directory for checkpoints and outputs
-- `no_amp`: Disable automatic mixed precision (default: false)
-
-### Example Config Structure
+### Key Training Parameters
 
 ```json
 {
-  "arch_layout": ["m4", ["T22"], "m4"],
+  "arch_layout": ["m4", ["T22"], "m4"],  // 1-stage: Mamba-Transformer-Mamba
   "d_model": [1024, 1536],
-  "d_intermediate": [0, 4096],
-  "vocab_size": 256,
-  "ssm_cfg": {
-    "chunk_size": 256,
-    "d_conv": 4,
-    "d_state": 128,
-    "expand": 2
-  },
-  "attn_cfg": {
-    "num_heads": [16, 16],
-    "rotary_emb_dim": [32, 48],
-    "window_size": [1023, -1]
-  },
-  "tie_embeddings": false,
   "training_config": {
     "data": "datasets/PI1M/PI1M_v2.csv",
-    "phase": "large",
-    "max_samples": null,
-    "batch_size": 16,
     "epochs": 5,
+    "batch_size": 16,
     "lr": 0.0001,
-    "weight_decay": 0.1,
-    "gradient_accumulation": 8,
-    "concatenate": true,
-    "num_concatenate": 10,
-    "concatenate_separator": " ",
-    "checkpoint_bytes": 1000000,
-    "num_test_samples": 50,
-    "num_visualize": 15,
-    "skip_visualization": false,
-    "output_dir": "checkpoints",
-    "no_amp": false
+    "concatenate": true,           // Concatenate 10 SMILES per sample
+    "checkpoint_bytes": 1000000    // Save every 1M bytes
   }
 }
 ```
 
-### Pre-configured Models
+### Training Outputs
 
-- **`hnet_smiles_small.json`**: Small config for testing (512/768 dims, 2 epochs, 5000 samples)
-- **`hnet_smiles_large.json`**: Large-scale config (1024/1536 dims, configurable epochs, full dataset)
-
-## Training Output
-
-After training, you'll find in `checkpoints/run_{phase}_{timestamp}/`:
-
-### Checkpoints
-
-- **Epoch checkpoints**: `checkpoint_epoch_{N}.pt` - Saved at the end of each epoch
-- **Byte-based checkpoints**: `checkpoint_bytes_{N}.pt` - Saved only when training loss improves
-  - Checkpoints are saved at regular byte intervals (every `checkpoint_bytes`)
-  - But only when the current loss is better than the previous best loss
-  - This saves disk space while preserving the best models
-
-### Predictions
-
-- **`visualizations/predictions/`**: Compressed pickle files with boundary predictions
-  - `predictions_bytes_1,000,000.pkl.gz`, `predictions_bytes_2,000,000.pkl.gz`, etc.
-  - One file per checkpoint interval (saved regardless of loss improvement)
-  - Contains boundary predictions for all test samples
-  - Much smaller than JSON (typically 5-10x compression)
-
-### Visualizations
-
-- **`visualizations/training_evolution_batch_N.gif`**: Animated GIFs showing chunking evolution
-  - Multiple GIFs generated, one per batch of test samples
-  - Shows how boundary predictions evolve across training checkpoints
-  - Generated automatically at the end of training
-  - Uses saved prediction files (no model reloading needed)
-  - Each GIF displays the tokenization behavior for a subset of test SMILES
-
-### Metadata
-
-- **`metadata.json`**: Complete training metadata including:
-  - Model configuration
-  - Training arguments
-  - Dataset information
-  - Training history (loss, bytes, checkpoints)
-  - Model info (parameters, device, dtype)
-
-- **`test_smiles.txt`**: Test SMILES used for visualization (one per line)
-- **`run_purpose.txt`**: Optional notes about the purpose of this training run
-
-## Analysis Framework
-
-The `analysis/` folder contains a comprehensive framework for analyzing HNet's tokenization behavior:
-
-### Analysis Components
-
-- **Jupyter Notebooks** (`notebooks/`):
-  - `01_data_generation.ipynb`: Generate tokenization data from trained models
-  - `02_dataset_nature_analysis.ipynb`: Compare PI1M (polymers) vs MOSES (molecules)
-  - `03_concatenation_effect.ipynb`: Analyze impact of concatenation strategy
-  - `04_training_amount_analysis.ipynb`: Study effect of training epochs
-  - `05_benchmark_comparison.ipynb`: Compare HNet with SmilesPE baseline
-
-- **Analysis Results** (`data/`):
-  - Tokenization statistics for all trained models
-  - Comparison summaries (CSV format)
-  - Token frequency distributions and statistics
-
-- **Reports**:
-  - `FINAL_REPORT.md`: Comprehensive analysis report with key findings
-  - Detailed comparison of HNet's learned tokenization vs. traditional methods
-
-This analysis framework enables deep investigation into how HNet learns to tokenize chemical SMILES strings dynamically.
-
-## Key Features
-
-### Config-Based Training
-
-All training parameters are specified in JSON config files. Simply edit the config and run training - no command-line arguments needed (though they can override config values).
-
-### Intelligent Checkpointing
-
-The training script uses a two-tier checkpointing strategy:
-
-1. **Boundary predictions**: Always saved at every `checkpoint_bytes` interval
-   - Saved to compressed pickle files (`.pkl.gz`)
-   - Used for visualization (no model reloading needed)
-   - Much smaller than full model checkpoints
-
-2. **Model checkpoints**: Only saved when training loss improves
-   - Saves disk space by not storing every checkpoint
-   - Preserves the best models at each byte interval
-   - Includes full model state, optimizer state, and metadata
-
-### Hierarchical Learning Rate Modulation
-
-The model applies different learning rates to different parts of the network:
-
-- **Encoder/Decoder stages**: Higher learning rate (3.0x base LR)
-- **Main network stages**: Lower learning rate (0.9x base LR)
-- **Multi-stage networks**: Interpolated learning rates
-
-This follows the HNet paper's recommendation for hierarchical training.
-
-### Automatic Visualization
-
-Training automatically generates visualization GIFs at the end:
-
-- Boundary predictions are saved during training at every `checkpoint_bytes` interval
-- Visualizations are generated from saved predictions (no model reloading needed)
-- Shows the evolution of chunking behavior across training steps
-- Similar to the original HNet paper visualizations
-
-### Load Balancing Loss
-
-The training includes a load balancing loss term (weighted at 0.01) to encourage uniform token selection across the routing module. This helps maintain balanced chunking behavior.
-
-### Mixed Precision Training
-
-Training uses automatic mixed precision (bfloat16) on GPU/MPS devices by default, which:
-- Reduces memory usage
-- Speeds up training
-- Maintains training stability
-
-Disable with `--no-amp` or `"no_amp": true` in config.
-
-### Graceful Shutdown
-
-The training script handles signals gracefully:
-
-- **SIGHUP**: Ignored (continues training during SSH disconnection)
-- **SIGTERM/SIGINT**: Saves checkpoint and exits gracefully
-
-For full SSH disconnection protection, use `nohup`, `screen`, `tmux`, or a systemd service.
-
-## Manual Visualization
-
-If you want to regenerate visualizations from saved predictions:
-
-```bash
-python visualizations/visualize_training_evolution.py \
-    --run-dir checkpoints/run_large_20251110_164118 \
-    --output checkpoints/run_large_20251110_164118/visualizations/
+```
+checkpoints/run_large_YYYYMMDD_HHMMSS/
+├── checkpoints/
+│   ├── checkpoint_epoch_*.pt      # Model checkpoints
+│   └── checkpoint_bytes_best.pt   # Best model
+├── visualizations/
+│   ├── predictions/*.pkl.gz       # Boundary predictions
+│   └── training_evolution_*.gif   # Evolution animations
+└── metadata.json                  # Training history
 ```
 
-This will generate multiple GIF files (`training_evolution_batch_1.gif`, `training_evolution_batch_2.gif`, etc.), one per batch of test samples.
-
-Plot training statistics:
+### Background Training (SSH-safe)
 
 ```bash
-python visualizations/visualize_stats.py \
-    --run-dir checkpoints/run_large_20251110_164118 \
-    --output-dir checkpoints/run_large_20251110_164118/visualizations/stats
-```
-
-## Generation
-
-Generate SMILES strings from a trained model:
-
-```bash
-python generate_smiles.py \
-    --checkpoint checkpoints/run_large_20251110_164118/checkpoints/checkpoint_epoch_5.pt \
-    --config configs/hnet_smiles_large.json \
-    --prompt "*" \
-    --max-tokens 512 \
-    --temperature 1.0
-```
-
-## Datasets
-
-The project supports two SMILES datasets:
-
-### PI1M Dataset
-- **Path**: `datasets/PI1M/PI1M_v2.csv`
-- **Size**: ~995K SMILES strings representing polymers
-- **Format**: CSV with SMILES and SA Score columns
-- **Example**: `*CCC[Fe]CCCC(=O)OCCCCOCCCNCC(*)=O,4.174851129781874`
-
-### MOSES Dataset
-- **Path**: `datasets/moses/smiles-molecules-moses_all.csv`
-- **Size**: Molecular SMILES strings
-- **Format**: CSV with SMILES strings
-
-### Training Pipeline
-The training pipeline:
-- Extracts SMILES from the first column (or the appropriate column)
-- Optionally concatenates multiple SMILES for longer sequences (10 by default)
-- Uses byte-level tokenization (ByteTokenizer) with 256 vocab size
-- Splits into train/test sets with a fixed random seed (42) for reproducibility
-- Supports both polymer (PI1M) and molecular (MOSES) SMILES
-
-## Platform Support
-
-- **CUDA**: Full CUDA support for GPU acceleration (EC2 instances)
-- **Mac M-chip**: Uses PyTorch MPS backend (Metal Performance Shaders)
-- **CPU**: Fallback for testing without GPU
-
-## Troubleshooting
-
-### Out of Memory Errors
-
-Reduce batch size or use gradient accumulation:
-
-```bash
-python train_smiles.py --config configs/hnet_smiles_large.json \
-    --batch-size 32 \
-    --gradient-accumulation 16
-```
-
-Or edit the config file to adjust these parameters.
-
-### Import Errors
-
-Make sure the virtual environment is activated:
-
-```bash
-cd /home/ec2-user/hnet_smiles
-source /opt/pytorch/bin/activate
-```
-
-### Disk Space Issues
-
-Training saves predictions at byte intervals. If disk space is limited:
-
-- Increase `checkpoint_bytes` in config to save less frequently
-- Set `skip_visualization: true` to skip prediction saving during training
-- Clean up old checkpoint directories
-- Note: Model checkpoints are only saved when loss improves, so they're already space-efficient
-
-### flash_attn not available on Mac
-
-This is expected. The model will use alternative attention mechanisms.
-
-### Training Stops When SSH Disconnects
-
-Use `nohup` or a terminal multiplexer:
-
-```bash
-# Using nohup
 nohup python train_smiles.py --config configs/hnet_smiles_large.json > training.log 2>&1 &
-
-# Using screen
-screen -S training
-python train_smiles.py --config configs/hnet_smiles_large.json
-# Detach with Ctrl+A D
-
-# Using tmux
-tmux new -s training
-python train_smiles.py --config configs/hnet_smiles_large.json
-# Detach with Ctrl+B D
+tail -f training.log  # Monitor progress
 ```
 
-## References
+---
 
-- **Original HNet paper**: [Dynamic Chunking for End-to-End Hierarchical Sequence Modeling](https://arxiv.org/abs/2507.07955)
-- **Original HNet repository**: https://github.com/goombalab/hnet
-- **PI1M dataset**: https://github.com/RUIMINMA1996/PI1M (Polymer SMILES)
-- **MOSES dataset**: https://github.com/molecularsets/moses (Molecular SMILES)
+## Part B: Tokenization Analysis
+
+Analyze learned tokenization patterns and compare with baselines.
+
+### Analysis Notebooks
+
+Navigate to `analysis/notebooks/` and run in order:
+
+| Notebook | Purpose | GPU Required |
+|----------|---------|--------------|
+| `01_data_generation.ipynb` | Extract tokens from trained models | Yes |
+| `02_dataset_nature_analysis.ipynb` | Compare polymer vs molecular | No |
+| `03_concatenation_effect.ipynb` | Study concatenation impact | No |
+| `04_training_amount_analysis.ipynb` | Analyze training dynamics | No |
+| `05_benchmark_comparison.ipynb` | Compare with SmilesPE | No |
+| `06_master_figure_token_distributions.ipynb` | Generate paper figures | No |
+| `07_architecture_effect_analysis.ipynb` | 1-stage vs 2-stage | No |
+| `08_compression_metrics_analysis.ipynb` | BPB and compression | No |
+
+### Running Analysis
+
+```bash
+cd analysis
+
+# Step 1: Generate tokenization data (requires GPU and trained models)
+python run_data_generation.py
+
+# Step 2: Run analysis notebooks
+cd notebooks
+jupyter notebook
+```
+
+### Key Analysis Scripts
+
+```bash
+# Test inference on a trained model
+python analysis/test_inference.py \
+    --checkpoint checkpoints/run_large_*/checkpoints/best_model.pt \
+    --smiles "CCO" "c1ccccc1"
+
+# Compare with SmilesPE baseline
+python analysis/baselines/bpe_comparison.py
+```
+
+### Analysis Outputs
+
+- **Figures**: `analysis/figures/` - Publication-ready plots
+- **Statistics**: `analysis/data/statistics/` - JSON files with metrics
+- **Report**: `analysis/FINAL_REPORT.md` - Comprehensive findings
+
+---
+
+## Part C: Property Prediction
+
+Evaluate H-Net embeddings as chemical featurizers for property prediction.
+
+### Tasks Evaluated
+
+| Task | Type | Dataset Size | Best Result |
+|------|------|--------------|-------------|
+| **BBBP** | Classification | 2K | H-Net wins (AUC 0.95 vs 0.93) |
+| **HIV** | Classification | 41K | H-Net wins (AUC 0.79 vs 0.76) |
+| **Tg** (polymer) | Regression | 5K | Competitive (MAE 26.6°C vs 24.8°C) |
+| **Lipophilicity** | Regression | 4K | RDKit wins |
+| **ESOL** | Regression | 1K | RDKit wins |
+
+### Running Property Prediction
+
+```bash
+cd property_prediction
+
+# Setup environment
+source setup_env.sh
+
+# Step 1: Extract features from H-Net models (requires GPU)
+python scripts/extract_all_features.py
+
+# Step 2: Run all experiments
+python scripts/run_all_experiments.py
+
+# Step 3: View results
+cat results/tables/comprehensive_results_final.csv
+```
+
+### Using H-Net as a Featurizer
+
+```python
+from property_prediction.featurizers import HNetFeaturizer
+
+# Load trained H-Net model
+featurizer = HNetFeaturizer(
+    checkpoint_path="checkpoints/run_large_*/checkpoints/best_model.pt",
+    pooling="mean"  # or "cls"
+)
+
+# Extract embeddings (768-dim)
+smiles_list = ["CCO", "c1ccccc1", "CC(=O)O"]
+embeddings = featurizer.featurize(smiles_list)  # Shape: (3, 768)
+```
+
+---
+
+## 🔧 Trained Models
+
+We provide the following pre-trained models (available upon request due to size):
+
+| Model | Dataset | Epochs | Architecture | Training Bytes |
+|-------|---------|--------|--------------|----------------|
+| PI1M-5ep | PI1M (polymer) | 5 | 1-stage | 340M |
+| PI1M-22ep | PI1M (polymer) | 22 | 1-stage | 1.05B |
+| MOSES-5ep | MOSES (molecular) | 5 | 1-stage | 340M |
+| PI1M-2stg | PI1M (polymer) | 5 | 2-stage | 340M |
+
+---
+
+## 📊 Reproducing Paper Results
+
+### Table 5: Tokenizer Comparison
+
+```bash
+cd analysis
+python baselines/bpe_comparison.py
+```
+
+### Figure 3: Token Overlap Heatmap
+
+```bash
+cd analysis/notebooks
+jupyter notebook 02_dataset_nature_analysis.ipynb
+```
+
+### Table 6: Property Prediction
+
+```bash
+cd property_prediction
+python scripts/run_all_experiments.py
+```
+
+---
+
+## 📚 Citation
+
+If you use this code, please cite:
+
+```bibtex
+@inproceedings{anonymous2026hnet_smiles,
+  title={Learning Chemical Grammar: Dynamic Tokenization for {SMILES} with Hierarchical Networks},
+  author={Anonymous},
+  booktitle={International Conference on Machine Learning (ICML)},
+  year={2026}
+}
+```
+
+---
+
+## 🔗 References
+
+- **H-Net Paper**: [Hierarchical Networks with Learned Dynamic Chunking](https://arxiv.org/abs/2501.xxxxx) (Hwang et al., 2025)
+- **Original H-Net Code**: https://github.com/goombalab/hnet
+- **SmilesPE**: [SMILES Pair Encoding](https://github.com/XinhaoLi74/SmilesPE) (Li & Fourches, 2021)
+- **PI1M Dataset**: https://github.com/RUIMINMA1996/PI1M
+- **MOSES Dataset**: https://github.com/molecularsets/moses
+
+---
+
+## 🛠️ Troubleshooting
+
+### Out of Memory
+
+```bash
+# Reduce batch size and increase gradient accumulation
+python train_smiles.py --config configs/hnet_smiles_large.json \
+    --batch-size 8 --gradient-accumulation 16
+```
+
+### Missing Dependencies
+
+```bash
+# Reinstall requirements
+pip install -r setup/requirements.txt
+pip install SmilesPE  # For baseline comparisons
+```
+
+### GPU Not Detected
+
+```python
+# Check PyTorch GPU support
+import torch
+print(f"CUDA available: {torch.cuda.is_available()}")
+print(f"MPS available: {torch.backends.mps.is_available()}")  # Mac
+```
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
