@@ -1,0 +1,5 @@
+# This file ensures the checkpoints folder is tracked by git
+# Actual checkpoint files are hosted on Hugging Face:
+# https://huggingface.co/collections/jordiferrero/h-net-smiles-checkpoints-6973301c4e3d748569c70b98
+
+

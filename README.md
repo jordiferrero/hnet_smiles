@@ -94,6 +94,33 @@ The setup script auto-detects your platform (CUDA, Mac M-chip, or CPU).
 # See datasets/moses/README.md for instructions
 ```
 
+### 📦 Pre-trained Models (Hugging Face)
+
+All trained model checkpoints from the paper are available on Hugging Face:
+
+**🔗 [H-Net SMILES Checkpoints Collection](https://huggingface.co/collections/jordiferrero/h-net-smiles-checkpoints-6973301c4e3d748569c70b98)**
+
+| Model | Dataset | Training | Architecture | Download |
+|-------|---------|----------|--------------|----------|
+| **PI1M-68M** | PI1M | 68M bytes | 1-stage | [Link](https://huggingface.co/jordiferrero/PI1M-68M) |
+| **PI1M-340M** | PI1M | 340M bytes | 1-stage | [Link](https://huggingface.co/jordiferrero/PI1M-340M) |
+| **PI1M-1B** | PI1M | 1.05B bytes | 1-stage | [Link](https://huggingface.co/jordiferrero/PI1M-1B) |
+| **PI1M-nocat** | PI1M | 340M bytes | 1-stage (no concat) | [Link](https://huggingface.co/jordiferrero/PI1M-nocat) |
+| **PI1M-2stg** | PI1M | 340M bytes | 2-stage | [Link](https://huggingface.co/jordiferrero/PI1M-2stg) |
+| **MOSES-340M** | MOSES | 340M bytes | 1-stage | [Link](https://huggingface.co/jordiferrero/MOSES-340M) |
+| **MOSES-nocat** | MOSES | 340M bytes | 1-stage (no concat) | [Link](https://huggingface.co/jordiferrero/MOSES-nocat) |
+| **MOSES-2stg** | MOSES | 340M bytes | 2-stage | [Link](https://huggingface.co/jordiferrero/MOSES-2stg) |
+
+```python
+# Quick download with Python
+from huggingface_hub import hf_hub_download
+
+checkpoint_path = hf_hub_download(
+    repo_id="jordiferrero/PI1M-1B",
+    filename="checkpoints/checkpoint_bytes_best.pt"
+)
+```
+
 ---
 
 ## Part A: Training H-Net on Chemical Data

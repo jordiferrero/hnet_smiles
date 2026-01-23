@@ -35,7 +35,11 @@ env/
 logs/
 
 # Large directories (model checkpoints, analysis data)
-/checkpoints/
+# Checkpoint files are hosted on Hugging Face: https://huggingface.co/jordiferrero
+/checkpoints/run_*/
+/checkpoints/*.pt
+!/checkpoints/README.md
+!/checkpoints/.gitkeep
 /analysis/logs/
 
 # Pickle files (large binary data)
